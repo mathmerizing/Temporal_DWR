@@ -168,10 +168,22 @@ class SpatialFE:
             z_n.assign(z)
         
         return reversed(solutions) # sort solutions from t = t0 to t = T
+    
+    def compute_goal_functional(self, temporal_mesh, primal_solutions):
+        value = 0.
+
+        u = Function(self.V)
+        for temporal_element, solution in zip(temporal_mesh, primal_solutions[1:]):
+            u.vector()[:] = solution
+            Δt = temporal_element[1] - temporal_element[0]
+            value += Δt*assemble(u * self.indicator * dx)
+
+        return value
 
 if __name__ == "__main__":
     # hyperparameters
     ERROR_TOL = 1e-4 # stopping criterion for DWR loop
+    MAX_DWR_ITERATIONS = 5
     temporal_mesh = TemporalMesh(
         t0 = 0.0, # start time 
         T = 2.0, # end time
@@ -189,34 +201,39 @@ if __name__ == "__main__":
     #     temporal_mesh.refine(refine_flags=[False]*(temporal_mesh.n_elements-1) + [True])
     # temporal_mesh.plot_mesh()
 
-    iteration_dwr = 1
-    while True:
+    for iteration_dwr in range(1, MAX_DWR_ITERATIONS+1):
         print(f"\nDWR ITERATION {iteration_dwr}:")
         print("================\n")
 
         print("Solve primal problem:")
         primal_solutions = spatial_fe.solve_primal(temporal_mesh.mesh)
 
-        print("Solve dual problem:")
-        dual_solutions = spatial_fe.solve_dual(temporal_mesh.mesh, primal_solutions)
+        print("Compute goal functional:")
+        goal_functional = spatial_fe.compute_goal_functional(temporal_mesh.mesh, primal_solutions)
+        J_reference = 2.9125264677148095e-05
+        print(f"n_k: {temporal_mesh.n_elements}, J(u_k): {goal_functional}, J(u) - J(u_k): {J_reference - goal_functional}")
 
-        print("Compute error estimator:")
-        print("  TODO...")
+        # uniform refinement
+        temporal_mesh.refine()
 
-        error_estimator = 1. # TODO
+        # print("Solve dual problem:")
+        # dual_solutions = spatial_fe.solve_dual(temporal_mesh.mesh, primal_solutions)
 
-        if error_estimator > ERROR_TOL:
-            print("Mark temporal elements for refinement:")
-            print("  TODO...")
+        # print("Compute error estimator:")
+        # print("  TODO...")
 
-            print("Refine temporal mesh:")
-            print("  TODO...")
+        # error_estimator = 1. # TODO
 
-            iteration_dwr += 1
-        else:
-            print(f"Temporal adaptivity finished! (estimated error = {error_estimator} < {ERROR_TOL})")
-            break
-        quit()
+        # if error_estimator > ERROR_TOL:
+        #     print("Mark temporal elements for refinement:")
+        #     print("  TODO...")
+
+        #     print("Refine temporal mesh:")
+        #     print("  TODO...")
+        # else:
+        #     print(f"Temporal adaptivity finished! (estimated error = {error_estimator} < {ERROR_TOL})")
+        #     break
+        # quit()
         
         
         
