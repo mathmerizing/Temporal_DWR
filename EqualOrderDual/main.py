@@ -8,6 +8,9 @@
 from fenics import *
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
+
+set_log_active(False) # turn off FEniCS logging
 
 class TemporalMesh:
     def __init__(self, t0, T, Δt):
@@ -58,19 +61,162 @@ class TemporalMesh:
         self.mesh = new_mesh
         self.n_elements = len(self.mesh)
 
+# primal right hand side function
+class PrimalRHSExpression(UserExpression):
+    _t = 0.
+
+    def set_time(self, t):
+        self._t = t
+
+    def eval_cell(self, value, x, _):
+        if ((x[0] - 0.5 - 0.25 * np.cos(2. * np.pi * self._t))**2 + (x[1] - 0.5 - 0.25 * np.sin(2. * np.pi * self._t))**2 < 0.125**2):
+            value[0] = np.sin(4. * np.pi * self._t)
+        else:
+            value[0] = 0.
+
+    def value_shape(self):
+        return ()  # scalar function
+    
+# indicator function for upper half of domain
+class IndicatorExpression(UserExpression):
+    def eval_cell(self, value, x, _):
+        if (x[1] > 0.5):
+            value[0] = 1.
+        else:
+            value[0] = 0.
+
+    def value_shape(self):
+        return ()  # scalar function
+
+class SpatialFE:
+    def __init__(self):
+        self.mesh = UnitSquareMesh(50, 50)
+        self.V = FunctionSpace(self.mesh, 'P', 1) # linear FE in space
+        self.bc = DirichletBC(self.V, Constant(0.), lambda _, on_boundary: on_boundary) # homogeneous Dirichlet BC everywhere
+        self.u = TrialFunction(self.V)
+        self.v = TestFunction(self.V)
+
+        self.mass_form = self.u * self.v * dx
+        self.laplace_form = inner(grad(self.u), grad(self.v)) * dx
+
+        self.rhs = PrimalRHSExpression() # right hand side for primal problem
+        self.indicator = IndicatorExpression() # indicator function for upper half of domain
+
+    def solve_primal(self, temporal_mesh):
+        solutions = []
+
+        # initial condition
+        u_0 = Constant(0.)
+        # u_n: solution from last time step
+        u_n = interpolate(u_0, self.V)
+        # solution on current time step
+        u = Function(self.V)
+
+        # store initial condition as numpy array
+        solutions.append(np.array(u_n.vector()))
+
+        # for each temporal element:
+        #    solve forward in time with backward Euler
+        for i, temporal_element in enumerate(tqdm(temporal_mesh)):
+            # print(f"Solve primal on I_{i} = ({temporal_element[0]}, {temporal_element[1]})")
+
+            Δt = temporal_element[1] - temporal_element[0]
+            self.rhs.set_time(temporal_element[1])
+            solve(self.mass_form + Δt*self.laplace_form == u_n*self.v*dx + Δt*self.rhs*self.v*dx, u, self.bc)
+
+            # store solution as numpy array
+            solutions.append(np.array(u.vector()))
+
+            # c = plot(u)
+            # plt.colorbar(c)
+            # plt.show()
+
+            u_n.assign(u)
         
+        return solutions
+    
+    def solve_dual(self, temporal_mesh, primal_solutions):
+        # NOTE: primal_solutions is only used for nonlinear PDEs or nonlinear goal functionals
+
+        solutions = []
+
+        # initial condition
+        z_0 = Constant(0.)
+        # z_n: solution from next time step
+        z_n = interpolate(z_0, self.V)
+        # solution on current time step
+        z = Function(self.V)
+
+        # store initial condition as numpy array
+        solutions.append(np.array(z_n.vector()))
+
+        # for each temporal element:
+        #    solve backward in time with backward Euler
+        for i, temporal_element in tqdm(list(enumerate(temporal_mesh))[::-1]):
+            # print(f"Solve dual on I_{i} = ({temporal_element[0]}, {temporal_element[1]})")
+            
+            Δt = temporal_element[1] - temporal_element[0]
+            solve(self.mass_form + Δt*self.laplace_form == z_n*self.v*dx + Δt*self.indicator*self.v*dx, z, self.bc)
+
+            # store solution as numpy array
+            solutions.append(np.array(z.vector()))
+
+            # c = plot(z)
+            # plt.colorbar(c)
+            # plt.show()
+
+            z_n.assign(z)
+        
+        return reversed(solutions) # sort solutions from t = t0 to t = T
+
 if __name__ == "__main__":
     # hyperparameters
     ERROR_TOL = 1e-4 # stopping criterion for DWR loop
     temporal_mesh = TemporalMesh(
         t0 = 0.0, # start time 
-        T = 5.0, # end time
-        Δt = 0.25 # initial uniform time step size
+        T = 2.0, # end time
+        Δt = 0.125 # initial uniform time step size
     )
-
-    for i in range(5):
-        temporal_mesh.refine(refine_flags=[False]*(temporal_mesh.n_elements-1) + [True])
-    temporal_mesh.plot_mesh()
-    quit()
-
+    spatial_fe = SpatialFE()
     
+    # plot the spatial mesh
+    # plot(spatial_fe.mesh)
+    # plt.title("Spatial Mesh")
+    # plt.show()
+
+    # # testing adaptive refinement: refine last element
+    # for i in range(5):
+    #     temporal_mesh.refine(refine_flags=[False]*(temporal_mesh.n_elements-1) + [True])
+    # temporal_mesh.plot_mesh()
+
+    iteration_dwr = 1
+    while True:
+        print(f"\nDWR ITERATION {iteration_dwr}:")
+        print("================\n")
+
+        print("Solve primal problem:")
+        primal_solutions = spatial_fe.solve_primal(temporal_mesh.mesh)
+
+        print("Solve dual problem:")
+        dual_solutions = spatial_fe.solve_dual(temporal_mesh.mesh, primal_solutions)
+
+        print("Compute error estimator:")
+        print("  TODO...")
+
+        error_estimator = 1. # TODO
+
+        if error_estimator > ERROR_TOL:
+            print("Mark temporal elements for refinement:")
+            print("  TODO...")
+
+            print("Refine temporal mesh:")
+            print("  TODO...")
+
+            iteration_dwr += 1
+        else:
+            print(f"Temporal adaptivity finished! (estimated error = {error_estimator} < {ERROR_TOL})")
+            break
+        quit()
+        
+        
+        
