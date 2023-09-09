@@ -167,18 +167,57 @@ class SpatialFE:
 
             z_n.assign(z)
         
-        return reversed(solutions) # sort solutions from t = t0 to t = T
+        return solutions[::-1] # sort solutions from t = t0 to t = T
     
     def compute_goal_functional(self, temporal_mesh, primal_solutions):
         value = 0.
 
         u = Function(self.V)
-        for temporal_element, solution in zip(temporal_mesh, primal_solutions[1:]):
+        for temporal_element, solution in tqdm(list(zip(temporal_mesh, primal_solutions[1:]))):
             u.vector()[:] = solution
             Δt = temporal_element[1] - temporal_element[0]
             value += Δt*assemble(u * self.indicator * dx)
 
         return value
+    
+    def compute_error_estimator(self, temporal_mesh, primal_solutions, dual_solutions):
+        values = np.zeros(len(temporal_mesh))
+
+        u = Function(self.V)   # u^{n+1}
+        #u_n = Function(self.V) # u^n
+        z = Function(self.V)   # z^{n+1}
+        z_n = Function(self.V) # z^n
+        for i, temporal_element in enumerate(tqdm(temporal_mesh)):
+            u.vector()[:] = primal_solutions[i+1]
+            #u_n.vector()[:] = primal_solutions[i]
+            z.vector()[:] = dual_solutions[i+1]
+            z_n.vector()[:] = dual_solutions[i]
+            Δt = temporal_element[1] - temporal_element[0]
+            
+            # primal residual based error estimator:
+            #   J(u) - J(u_k) ≈ η := ρ(u_k)(I_k z_k - z_k)
+            #      ∘ η: error estimator
+            #      ∘ ρ: residual of the space-time formulation of the primal problem
+            #      ∘ u_k, z_k: low-order in time primal/dual solution (here: dG(0) / Backward Euler; in general: dG(r))
+            #      ∘ I_k: temporal reconstruction of a higher-order in time solution, i.e. I_k u_k is a dG(r+1) solution which is interpolated from the dG(r) solution u_k
+            #             for dG(0): I_k u_k is a linear interpolation of (t_{m-1}, u_k(t_{m-1})) and (t_m, u_k(t_m)) on the temporal element I_m = (t_{m-1}, t_m)
+            #             for dG(1): I_k u_k can be implemented as a patch-wise interpolation of u_k from to neighboring temporal elements I_{m-1} = (t_{m-2}, t_{m-1}) and I_m = (t_{m-1}, t_m) onto \tilde{I}_m = (t_{m-2}, t_m) and then interpreting this (r+1)-degree polynomial as a dG(r+1) solution on I_{m-1} and I_m
+            #
+            # More conretely for dG(0):
+            #    I_k z_k = z_k(t_{m-1}) + (z_k(t_m) - z_k(t_{m-1})) * (t - t_{m-1}) / (t_m - t_{m-1})   for t ∈ I_m = (t_{m-1}, t_m)
+            # And consequently:
+            #    I_k z_k - z_k = (z_k(t_m) - z_k(t_{m-1})) * (t - t_{m-1}) / (t_m - t_{m-1})   for t ∈ I_m = (t_{m-1}, t_m)
+            # For the evaluation of the primal residual, we need to exactly integrate constant functions in time => trapezoidal rule is enough for quadrature of the temporal integral
+            # The jump terms in the primal residual are zero because (I_k z_k - z_k)^+_{m-1} = 0 on I_m.
+            # The time derivative of u_k is zero because u_k is a dG(0) solution.
+            # Hence, only laplace term and the right hand side remain in the primal residual.
+            # Using the trapezoidal rule for the temporal integral, we get:
+            #   ρ(u_k)(I_k z_k - z_k) = (Δt / 2) * ( (f^m, z_k^m - z_k^{m-1}) - (∇_x u_k^m, z_k^m - z_k^{m-1}) )
+
+            self.rhs.set_time(temporal_element[1])
+            values[i] += (Δt / 2.) * assemble(self.rhs * (z - z_n) * dx) - (Δt / 2.) * assemble(inner(grad(u), grad(z - z_n)) * dx)
+
+        return values
 
 if __name__ == "__main__":
     # hyperparameters
@@ -211,27 +250,35 @@ if __name__ == "__main__":
         print("Compute goal functional:")
         goal_functional = spatial_fe.compute_goal_functional(temporal_mesh.mesh, primal_solutions)
         J_reference = 2.9125264677148095e-05
-        print(f"n_k: {temporal_mesh.n_elements}, J(u_k): {goal_functional}, J(u) - J(u_k): {J_reference - goal_functional}")
+        true_error = J_reference - goal_functional
+        print(f"  n_k:           {temporal_mesh.n_elements}")
+        print(f"  J(u_k):        {goal_functional:.8e}")
+        print(f"  J(u) - J(u_k): {true_error:.8e}")
 
-        # uniform refinement
+        # # uniform refinement
+        # temporal_mesh.refine()
+
+        print("Solve dual problem:")
+        dual_solutions = spatial_fe.solve_dual(temporal_mesh.mesh, primal_solutions)
+
+        print("Compute error estimator:")
+        error_estimator = spatial_fe.compute_error_estimator(temporal_mesh.mesh, primal_solutions, dual_solutions)
+        print(f"  η_k: {np.sum(error_estimator)}")
+        print("   TODO: effectivity, marking, refinement, debug estimator")
+        # TODO: debug error estimator
+
+        # uniform refinement in time
         temporal_mesh.refine()
 
-        # print("Solve dual problem:")
-        # dual_solutions = spatial_fe.solve_dual(temporal_mesh.mesh, primal_solutions)
-
-        # print("Compute error estimator:")
-        # print("  TODO...")
-
-        # error_estimator = 1. # TODO
-
-        # if error_estimator > ERROR_TOL:
+        # TODO!!!
+        # if np.abs(np.sum(error_estimator)) > ERROR_TOL:
         #     print("Mark temporal elements for refinement:")
         #     print("  TODO...")
 
         #     print("Refine temporal mesh:")
         #     print("  TODO...")
         # else:
-        #     print(f"Temporal adaptivity finished! (estimated error = {error_estimator} < {ERROR_TOL})")
+        #     print(f"Temporal adaptivity finished! (estimated error = {np.abs(np.sum(error_estimator))} < {ERROR_TOL})")
         #     break
         # quit()
         
