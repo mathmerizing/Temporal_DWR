@@ -249,7 +249,7 @@ if __name__ == "__main__":
 
         print("Compute goal functional:")
         goal_functional = spatial_fe.compute_goal_functional(temporal_mesh.mesh, primal_solutions)
-        J_reference = 2.9125264677148095e-05
+        J_reference = 3.058290061946076e-05 # reference from uniform refinement with 262,144 temporal elements
         true_error = J_reference - goal_functional
         print(f"  n_k:           {temporal_mesh.n_elements}")
         print(f"  J(u_k):        {goal_functional:.8e}")
