@@ -184,12 +184,12 @@ class SpatialFE:
         values = np.zeros(len(temporal_mesh))
 
         u = Function(self.V)   # u^{n+1}
-        #u_n = Function(self.V) # u^n
+        u_n = Function(self.V) # u^n
         z = Function(self.V)   # z^{n+1}
         z_n = Function(self.V) # z^n
         for i, temporal_element in enumerate(tqdm(temporal_mesh)):
             u.vector()[:] = primal_solutions[i+1]
-            #u_n.vector()[:] = primal_solutions[i]
+            u_n.vector()[:] = primal_solutions[i]
             z.vector()[:] = dual_solutions[i+1]
             z_n.vector()[:] = dual_solutions[i]
             Δt = temporal_element[1] - temporal_element[0]
@@ -212,10 +212,12 @@ class SpatialFE:
             # The time derivative of u_k is zero because u_k is a dG(0) solution.
             # Hence, only laplace term and the right hand side remain in the primal residual.
             # Using the trapezoidal rule for the temporal integral, we get:
-            #   ρ(u_k)(I_k z_k - z_k) = (Δt / 2) * ( (f^m, z_k^m - z_k^{m-1}) - (∇_x u_k^m, z_k^m - z_k^{m-1}) )
+
+            # TODO: adapt theory here!!!
+            #   ρ(u_k)(I_k z_k - z_k) = (Δt / 2) * ( (f^m, z_k^m - z_k^{m-1}) - (∇_x u_k^m, z_k^m - z_k^{m-1}) ) 
 
             self.rhs.set_time(temporal_element[1])
-            values[i] += (Δt / 2.) * assemble(self.rhs * (z - z_n) * dx) - (Δt / 2.) * assemble(inner(grad(u), grad(z - z_n)) * dx)
+            values[i] += (Δt / 2.) * assemble(self.rhs * (z - z_n) * dx) - assemble((u - u_n) * (z - z_n) * dx) - (Δt / 2.) * assemble(inner(grad(u), grad(z - z_n)) * dx)
 
         return values
 
@@ -264,6 +266,7 @@ if __name__ == "__main__":
         print("Compute error estimator:")
         error_estimator = spatial_fe.compute_error_estimator(temporal_mesh.mesh, primal_solutions, dual_solutions)
         print(f"  η_k: {np.sum(error_estimator)}")
+        print(f"  effectivity index: {true_error / np.sum(error_estimator)}")
         print("   TODO: effectivity, marking, refinement, debug estimator")
         # TODO: debug error estimator
 
