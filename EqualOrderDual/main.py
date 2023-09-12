@@ -190,8 +190,13 @@ class SpatialFE:
         for i, temporal_element in enumerate(tqdm(temporal_mesh)):
             u.vector()[:] = primal_solutions[i+1]
             u_n.vector()[:] = primal_solutions[i]
-            z.vector()[:] = dual_solutions[i+1]
-            z_n.vector()[:] = dual_solutions[i]
+            # z.vector()[:] = dual_solutions[i+1]
+            # z_n.vector()[:] = dual_solutions[i]
+            z.vector()[:] = dual_solutions[i]
+            if i > 0:
+                z_n.vector()[:] = dual_solutions[i-1]
+            else:
+                z_n.vector()[:] = dual_solutions[i]
             Δt = temporal_element[1] - temporal_element[0]
             
             # primal residual based error estimator:
@@ -216,8 +221,14 @@ class SpatialFE:
             # TODO: adapt theory here!!!
             #   ρ(u_k)(I_k z_k - z_k) = (Δt / 2) * ( (f^m, z_k^m - z_k^{m-1}) - (∇_x u_k^m, z_k^m - z_k^{m-1}) ) 
 
+            values[i] += - assemble((u - u_n) * (z - z_n) * dx) - (Δt / 2.) * assemble(inner(grad(u), grad(z - z_n)) * dx)
+            # self.rhs.set_time(temporal_element[0])
+            # values[i] += (Δt / 2.) * assemble(self.rhs * (z - z_n) * dx)
+
             self.rhs.set_time(temporal_element[1])
-            values[i] += (Δt / 2.) * assemble(self.rhs * (z - z_n) * dx) - assemble((u - u_n) * (z - z_n) * dx) - (Δt / 2.) * assemble(inner(grad(u), grad(z - z_n)) * dx)
+            values[i] += (Δt / 2.) * assemble(self.rhs * z * dx)
+            self.rhs.set_time(temporal_element[0])
+            values[i] -= (Δt / 2.) * assemble(self.rhs * z_n * dx)
 
         return values
 
@@ -228,7 +239,7 @@ if __name__ == "__main__":
     temporal_mesh = TemporalMesh(
         t0 = 0.0, # start time 
         T = 2.0, # end time
-        Δt = 0.125 # initial uniform time step size
+        Δt = 0.05 #0.125 # initial uniform time step size
     )
     spatial_fe = SpatialFE()
     
