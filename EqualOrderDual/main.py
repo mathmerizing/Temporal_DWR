@@ -9,6 +9,7 @@ from fenics import *
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import sys
 
 set_log_active(False) # turn off FEniCS logging
 
@@ -61,6 +62,10 @@ class TemporalMesh:
         self.mesh = new_mesh
         self.n_elements = len(self.mesh)
 
+    def print(self):
+        for i, element in enumerate(self.mesh):
+            print(f"I_{i} = ({element[0]}, {element[1]})")
+        
 # primal right hand side function
 class PrimalRHSExpression(UserExpression):
     _t = 0.
@@ -197,6 +202,7 @@ class SpatialFE:
                 z_n.vector()[:] = dual_solutions[i-1]
             else:
                 z_n.vector()[:] = dual_solutions[i]
+            
             Δt = temporal_element[1] - temporal_element[0]
             
             # primal residual based error estimator:
@@ -233,8 +239,16 @@ class SpatialFE:
         return values
 
 if __name__ == "__main__":
+    # get refinement type from cli
+    if len(sys.argv) != 2 or sys.argv[1] not in ["uniform", "adaptive"]:
+        print("Usage: python3 main.py <refinement_type>")
+        print("  refinement_type: uniform, adaptive")
+        quit()
+    refinement_type = sys.argv[1]
+    print(f"Refinement type: {refinement_type}")
+
     # hyperparameters
-    ERROR_TOL = 1e-4 # stopping criterion for DWR loop
+    ERROR_TOL = 1e-14 # stopping criterion for DWR loop
     MAX_DWR_ITERATIONS = 5
     temporal_mesh = TemporalMesh(
         t0 = 0.0, # start time 
@@ -268,33 +282,64 @@ if __name__ == "__main__":
         print(f"  J(u_k):        {goal_functional:.8e}")
         print(f"  J(u) - J(u_k): {true_error:.8e}")
 
-        # # uniform refinement
-        # temporal_mesh.refine()
 
         print("Solve dual problem:")
         dual_solutions = spatial_fe.solve_dual(temporal_mesh.mesh, primal_solutions)
 
         print("Compute error estimator:")
         error_estimator = spatial_fe.compute_error_estimator(temporal_mesh.mesh, primal_solutions, dual_solutions)
+        
+        # get the start and end time values for each temporal element
+        start_times = np.array([temporal_mesh.mesh[i][0] for i in range(temporal_mesh.n_elements)])
+        end_times = np.array([temporal_mesh.mesh[i][1] for i in range(temporal_mesh.n_elements)])
+
+        # plot the error estimator in a bar chart
+        plt.bar(0.5*(start_times+end_times), error_estimator, width=end_times-start_times, align='center', edgecolor='black')
+        plt.title("Error estimator")
+        plt.xlabel("Temporal element midpoint")
+        plt.ylabel("Error estimate")
+        plt.show()
+        
         print(f"  η_k: {np.sum(error_estimator)}")
         print(f"  effectivity index: {true_error / np.sum(error_estimator)}")
-        print("   TODO: effectivity, marking, refinement, debug estimator")
+        print("   TODO: debug estimator")
         # TODO: debug error estimator
 
-        # uniform refinement in time
-        temporal_mesh.refine()
+        if refinement_type == "uniform":
+            # uniform refinement in time
+            temporal_mesh.refine()
+        elif refinement_type == "adaptive":
+            if np.abs(np.sum(error_estimator)) > ERROR_TOL:
+                print("Mark temporal elements for refinement")
+                # create a list of boolean values which indicate whether a temporal element should be refined or not
+                # mark the cells responsible for 50 % of the total error for refinement
+                total_abs_error = np.sum(np.abs(error_estimator))
+                
+                # sort the absolute error estimator in descending order including the index
+                sorted_indices = np.argsort(np.abs(error_estimator))[::-1]
+                sorted_abs_error = np.abs(error_estimator[sorted_indices])
+                
+                # get temporal elements which are responsible for 50 % of the total error
+                refine_flags = [False for i in range(temporal_mesh.n_elements)]
+                sum_abs_error = 0.
+                for i in range(temporal_mesh.n_elements):
+                    sum_abs_error += sorted_abs_error[i]
+                    refine_flags[sorted_indices[i]] = True
+                    if sum_abs_error >= 0.5 * total_abs_error:
+                        break
 
-        # TODO!!!
-        # if np.abs(np.sum(error_estimator)) > ERROR_TOL:
-        #     print("Mark temporal elements for refinement:")
-        #     print("  TODO...")
+                # plot the error estimator in a bar chart and use a different color for the elements that should be refined
+                plt.bar(0.5*(start_times+end_times), error_estimator, width=end_times-start_times, align='center', edgecolor='black', color=np.array(["blue" if flag else "orange" for flag in refine_flags]))
+                plt.title("Error estimator")
+                plt.xlabel("Temporal element midpoint")
+                plt.ylabel("Error estimate")
+                plt.show()
 
-        #     print("Refine temporal mesh:")
-        #     print("  TODO...")
-        # else:
-        #     print(f"Temporal adaptivity finished! (estimated error = {np.abs(np.sum(error_estimator))} < {ERROR_TOL})")
-        #     break
-        # quit()
+                print("Refine temporal mesh")
+                temporal_mesh.refine(refine_flags=refine_flags)
+            else:
+                print(f"Temporal adaptivity finished! (estimated error = {np.abs(np.sum(error_estimator))} < {ERROR_TOL})")
+                break
         
         
         
