@@ -126,8 +126,11 @@ class SpatialFE:
             # print(f"Solve primal on I_{i} = ({temporal_element[0]}, {temporal_element[1]})")
 
             Δt = temporal_element[1] - temporal_element[0]
-            self.rhs.set_time(temporal_element[1])
-            solve(self.mass_form + Δt*self.laplace_form == u_n*self.v*dx + Δt*self.rhs*self.v*dx, u, self.bc)
+            L = u_n*self.v*dx
+            for w_q, t_q in zip([Δt], [temporal_element[1]]):
+                self.rhs.set_time(t_q)
+                L += w_q * self.rhs * self.v * dx
+            solve(self.mass_form + Δt*self.laplace_form == L, u, self.bc)
 
             # store solution as numpy array
             solutions.append(np.array(u.vector()))
@@ -197,12 +200,34 @@ class SpatialFE:
             u_n.vector()[:] = primal_solutions[i]
             # z.vector()[:] = dual_solutions[i+1]
             # z_n.vector()[:] = dual_solutions[i]
+
             z.vector()[:] = dual_solutions[i]
             if i > 0:
                 z_n.vector()[:] = dual_solutions[i-1]
             else:
                 z_n.vector()[:] = dual_solutions[i]
+
+            _z = dual_solutions[i]
+            _z_n = None
+            if i > 0:
+                _z_n = dual_solutions[i-1]
+            else:
+                _z_n = dual_solutions[i]
             
+            # I_k z_k: for dG(0) this is a linear interpolation between z_k(t_{m-1}) and z_k(t_m) on the temporal element I_m = (t_{m-1}, t_m)
+            def z_fine(t):
+                assert t >= temporal_element[0] and t <= temporal_element[1]
+                z_fine = Function(self.V)
+                z_fine.vector()[:] = _z_n + (_z - _z_n) * (t - temporal_element[0]) / (temporal_element[1] - temporal_element[0])
+                return z_fine
+
+            # z_k: for dG(0) this is a constant function on the temporal element I_m = (t_{m-1}, t_m)
+            def z_coarse(t):
+                assert t >= temporal_element[0] and t <= temporal_element[1]
+                z_coarse = Function(self.V)
+                z_coarse.vector()[:] = _z
+                return z_coarse
+
             Δt = temporal_element[1] - temporal_element[0]
             
             # primal residual based error estimator:
@@ -227,14 +252,28 @@ class SpatialFE:
             # TODO: adapt theory here!!!
             #   ρ(u_k)(I_k z_k - z_k) = (Δt / 2) * ( (f^m, z_k^m - z_k^{m-1}) - (∇_x u_k^m, z_k^m - z_k^{m-1}) ) 
 
-            values[i] += - assemble((u - u_n) * (z - z_n) * dx) - (Δt / 2.) * assemble(inner(grad(u), grad(z - z_n)) * dx)
+            # jump term: (u_k^{m} - u_k^{m-1}) * (I_k z_k - z_k)^+_{m-1}
+            values[i] -= assemble((u-u_n) * (z_fine(temporal_element[0]) - z_coarse(temporal_element[0])) * dx)
+
+            # laplace term: (∇_x u_k^m, I_k z_k - z_k)           [trapezoidal rule for temporal integral]
+            for w_q, t_q in zip([Δt / 2., Δt / 2.], [temporal_element[0], temporal_element[1]]): 
+                values[i] -= w_q * assemble(inner(grad(u), grad(z_fine(t_q) - z_coarse(t_q))) * dx)
+
+            #  values[i] += - assemble((u - u_n) * (z - z_n) * dx) - (Δt / 2.) * assemble(inner(grad(u), grad(z - z_n)) * dx)
+
+            # right hand side term: (f^m, I_k z_k - z_k)           [Simpson's rule for temporal integral]
+            # Simpson: for w_q, t_q in zip([Δt / 6., 4. * Δt / 6., Δt / 6.], [temporal_element[0], (temporal_element[0] + temporal_element[1]) / 2., temporal_element[1]]):
+            for w_q, t_q in zip([Δt / 2., Δt / 2.], [temporal_element[0], temporal_element[1]]):
+                self.rhs.set_time(t_q)
+                values[i] += w_q * assemble(self.rhs * (z_fine(t_q) - z_coarse(t_q)) * dx)
+
             # self.rhs.set_time(temporal_element[0])
             # values[i] += (Δt / 2.) * assemble(self.rhs * (z - z_n) * dx)
 
-            self.rhs.set_time(temporal_element[1])
-            values[i] += (Δt / 2.) * assemble(self.rhs * z * dx)
-            self.rhs.set_time(temporal_element[0])
-            values[i] -= (Δt / 2.) * assemble(self.rhs * z_n * dx)
+            # self.rhs.set_time(temporal_element[1])
+            # values[i] += (Δt / 2.) * assemble(self.rhs * z * dx)
+            # self.rhs.set_time(temporal_element[0])
+            # values[i] -= (Δt / 2.) * assemble(self.rhs * z_n * dx)
 
         return values
 
@@ -249,13 +288,16 @@ if __name__ == "__main__":
 
     # hyperparameters
     ERROR_TOL = 1e-14 # stopping criterion for DWR loop
-    MAX_DWR_ITERATIONS = 5
+    MAX_DWR_ITERATIONS = 3#5
+    PLOT_ESTIMATOR = False
     temporal_mesh = TemporalMesh(
         t0 = 0.0, # start time 
         T = 2.0, # end time
         Δt = 0.05 #0.125 # initial uniform time step size
     )
     spatial_fe = SpatialFE()
+
+    convergence_table = {}
     
     # plot the spatial mesh
     # plot(spatial_fe.mesh)
@@ -282,7 +324,6 @@ if __name__ == "__main__":
         print(f"  J(u_k):        {goal_functional:.8e}")
         print(f"  J(u) - J(u_k): {true_error:.8e}")
 
-
         print("Solve dual problem:")
         dual_solutions = spatial_fe.solve_dual(temporal_mesh.mesh, primal_solutions)
 
@@ -293,15 +334,24 @@ if __name__ == "__main__":
         start_times = np.array([temporal_mesh.mesh[i][0] for i in range(temporal_mesh.n_elements)])
         end_times = np.array([temporal_mesh.mesh[i][1] for i in range(temporal_mesh.n_elements)])
 
-        # plot the error estimator in a bar chart
-        plt.bar(0.5*(start_times+end_times), error_estimator, width=end_times-start_times, align='center', edgecolor='black')
-        plt.title("Error estimator")
-        plt.xlabel("Temporal element midpoint")
-        plt.ylabel("Error estimate")
-        plt.show()
+        if PLOT_ESTIMATOR:
+            # plot the error estimator in a bar chart
+            plt.bar(0.5*(start_times+end_times), error_estimator, width=end_times-start_times, align='center', edgecolor='black')
+            plt.title("Error estimator")
+            plt.xlabel("Temporal element midpoint")
+            plt.ylabel("Error estimate")
+            plt.show()
         
-        print(f"  η_k: {np.sum(error_estimator)}")
-        print(f"  effectivity index: {true_error / np.sum(error_estimator)}")
+        estimated_error = np.sum(error_estimator)
+        effectivity_index = true_error / estimated_error
+        convergence_table[temporal_mesh.n_elements] = {
+            "J(u_k)": goal_functional, 
+            "J(u) - J(u_k)": true_error, 
+            "η_k": estimated_error,
+            "effectivity index": effectivity_index
+        }
+        print(f"  η_k: {estimated_error}")
+        print(f"  effectivity index: {effectivity_index:.8e}")
         print("   TODO: debug estimator")
         # TODO: debug error estimator
 
@@ -309,6 +359,7 @@ if __name__ == "__main__":
             # uniform refinement in time
             temporal_mesh.refine()
         elif refinement_type == "adaptive":
+            # TODO: use relative stopping criterion
             if np.abs(np.sum(error_estimator)) > ERROR_TOL:
                 print("Mark temporal elements for refinement")
                 # create a list of boolean values which indicate whether a temporal element should be refined or not
@@ -328,18 +379,27 @@ if __name__ == "__main__":
                     if sum_abs_error >= 0.5 * total_abs_error:
                         break
 
-                # plot the error estimator in a bar chart and use a different color for the elements that should be refined
-                plt.bar(0.5*(start_times+end_times), error_estimator, width=end_times-start_times, align='center', edgecolor='black', color=np.array(["blue" if flag else "orange" for flag in refine_flags]))
-                plt.title("Error estimator")
-                plt.xlabel("Temporal element midpoint")
-                plt.ylabel("Error estimate")
-                plt.show()
+                if PLOT_ESTIMATOR:
+                    # plot the error estimator in a bar chart and use a different color for the elements that should be refined
+                    plt.bar(0.5*(start_times+end_times), error_estimator, width=end_times-start_times, align='center', edgecolor='black', color=np.array(["blue" if flag else "orange" for flag in refine_flags]))
+                    plt.title("Error estimator")
+                    plt.xlabel("Temporal element midpoint")
+                    plt.ylabel("Error estimate")
+                    plt.show()
 
                 print("Refine temporal mesh")
                 temporal_mesh.refine(refine_flags=refine_flags)
             else:
                 print(f"Temporal adaptivity finished! (estimated error = {np.abs(np.sum(error_estimator))} < {ERROR_TOL})")
                 break
-        
+    
+    # print convergence table using pandas and scientific notation
+    import pandas as pd
+    print("\nConvergence table:")
+    print("==================\n")
+    pd.set_option('display.float_format', lambda x: f"{x:.3e}")
+    print(pd.DataFrame.from_dict(convergence_table, orient='index'))
+
+
         
         
