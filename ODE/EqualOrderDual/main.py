@@ -87,6 +87,71 @@ def compute_goal_functional(mesh, primal_solutions, goal_functional):
             J += Δt * primal_solutions[i+1]
     return J
 
+def solve_dual(mesh, primal_solutions, goal_functional):
+    # solve dual problem
+    z = []
+    if goal_functional == "end_time":
+        # z(T) = 1
+        z.append(1.)
+    elif goal_functional == "time_integral":
+        # z(T) = 0
+        z.append(0.)
+    for element in reversed(mesh):
+        # dG(0) approximation of ∂_t z + z = 0:
+        #      z_n = (1 + Δt) z_{n+1} 
+        # NOTE: for goal functional J(u) = ∫_0^T u(t) dt, we have to add Δt to z_n since we have a RHS in the dual problem
+        Δt = element[1] - element[0]
+        z.append(z[-1] * (1. + Δt))
+        if goal_functional == "time_integral":
+            z[-1] += Δt
+    return z[::-1]
+
+def plot_solutions(mesh, primal_solutions, dual_solutions, goal_functional_type):
+    # plot primal and dual solutions
+    plt.clf()
+    plt.title("Primal and dual solutions")
+    # plot temporal mesh
+    plt.plot([mesh.mesh[0][0], mesh.mesh[-1][1]], [0., 0.], color="black")
+    plt.plot([mesh.t0, mesh.t0], [-0.1, 0.1], color="black")
+    for i in range(len(mesh.mesh)):
+        plt.plot([mesh.mesh[i][1], mesh.mesh[i][1]], [-0.1, 0.1], color="black")
+    
+    # plot primal solutions
+    X = []
+    for element in mesh.mesh:
+        X.append(element[0])
+        X.append(element[1])
+        X.append(element[1])
+    Y = []
+    for i in range(len(mesh.mesh)):
+        Y.append(primal_solutions[i+1])
+        Y.append(primal_solutions[i+1])
+        Y.append(np.inf)
+    plt.plot(X, Y, color="blue", label="primal (FE)")
+    X_true = np.linspace(mesh.t0, mesh.T, 1000)
+    Y_true = np.exp(X_true)
+    plt.plot(X_true, Y_true, color="blue", linestyle="dashed", label="primal (true)")
+    # plot dual solutions
+    Y = []
+    for i in range(len(mesh.mesh)):
+        Y.append(dual_solutions[i])
+        Y.append(dual_solutions[i])
+        Y.append(np.inf)
+    plt.plot(X, Y, color="red", label="dual (FE)")
+    if goal_functional_type == "end_time":
+        Y_true = np.exp(-X_true+1.)
+    elif goal_functional_type == "time_integral":
+        Y_true = np.exp(-X_true+1.) - 1.
+    plt.plot(X_true, Y_true, color="red", linestyle="dashed", label="dual (true)")
+    plt.legend()
+    plt.xlim([mesh.t0-mesh.Δt, mesh.T+mesh.Δt])
+    plt.ylim([-1., 4.])
+    plt.xticks([])
+    plt.yticks([])
+    for spine in plt.gca().spines.values():
+        spine.set_visible(False)
+    plt.show()
+
 if __name__ == "__main__":
     # get refinement type from cli
     if len(sys.argv) != 3 or sys.argv[1] not in ["uniform", "adaptive"] or sys.argv[2] not in ["end_time", "time_integral"]:
@@ -101,8 +166,9 @@ if __name__ == "__main__":
 
     # hyperparameters
     ERROR_TOL = 1e-14 # stopping criterion for DWR loop
-    MAX_DWR_ITERATIONS = 10 #15 # 25
-    PLOT_ESTIMATOR = False
+    MAX_DWR_ITERATIONS = 5 #10 #15 # 25
+    PLOT_ESTIMATOR = True #False
+    PLOT_SOLUTIONS = True #False
     mesh = TemporalMesh(
         t0 = 0.0, # start time
         T = 1.0,  # end time
@@ -129,6 +195,16 @@ if __name__ == "__main__":
         print(f"  n_k:           {mesh.n_elements}")
         print(f"  J(u_k):        {goal_functional:.8e}")
         print(f"  J(u) - J(u_k): {true_error:.8e}")
+
+        print("Solve dual problem:")
+        dual_solutions = solve_dual(mesh.mesh, primal_solutions, goal_functional_type)
+
+        if PLOT_SOLUTIONS:
+            plot_solutions(mesh, primal_solutions, dual_solutions, goal_functional_type)
+
+        print("Compute error estimator:")
+        
+        # # TODO
 
         # uniform refinement
         mesh.refine()
