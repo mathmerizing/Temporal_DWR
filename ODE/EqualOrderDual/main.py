@@ -8,6 +8,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from tabulate import tabulate
 import sys
 
 class TemporalMesh:
@@ -257,7 +258,11 @@ if __name__ == "__main__":
 
     # hyperparameters
     ERROR_TOL = 1e-14 # stopping criterion for DWR loop
-    MAX_DWR_ITERATIONS = 20 #10 #15 # 25
+    MAX_DWR_ITERATIONS = 1
+    if refinement_type == "uniform":
+        MAX_DWR_ITERATIONS = 19
+    elif refinement_type == "adaptive":
+        MAX_DWR_ITERATIONS = 43
     PLOT_ESTIMATOR = False #True
     PLOT_SOLUTIONS = False #True
     mesh = TemporalMesh(
@@ -366,11 +371,46 @@ if __name__ == "__main__":
             else:
                 print(f"Temporal adaptivity finished! (estimated error = {np.abs(np.sum(error_estimator))} < {ERROR_TOL})")
                 break
+
+
+    # print convergence table as tabulate
+    for tablefmt in ["simple", "latex"]:
+        table = tabulate([[row[0], *row[1].values()] for row in convergence_table.items()], headers=["#DoFs", "$J(u_k)$", "$J(u) - J(u_k)$", "$\eta_k$", "$I_{eff}$"], tablefmt=tablefmt)
+        print(table)
     
-    print("\nConvergence table:")
-    print("==================\n")
-    print("DoFs (n_k) | J(u_k) | J(u) - J(u_k) | η_k | effectivity index")
-    print("-------------------------------------------------------------")
-    for key, value in convergence_table.items():
-        print(f"{key} | {value['J(u_k)']:.8e} | {value['J(u) - J(u_k)']:.8e} | {value['η_k']:.8e} | {value['effectivity index']:.8e}")
+    # print("\nConvergence table:")
+    # print("==================\n")
+    # print("DoFs (n_k) | J(u_k) | J(u) - J(u_k) | η_k | effectivity index")
+    # print("-------------------------------------------------------------")
+    # for key, value in convergence_table.items():
+    #     print(f"{key} | {value['J(u_k)']:.8e} | {value['J(u) - J(u_k)']:.8e} | {value['η_k']:.8e} | {value['effectivity index']:.8e}")
+
+    # plot convergence table
+    plt.clf()
+    plt.title("Convergence table")
+    plt.xlabel("DoFs")
+    plt.ylabel("True error")
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.plot(list(convergence_table.keys()), [abs(value["J(u) - J(u_k)"]) for value in convergence_table.values()], color="blue", marker="o")
+    plt.show()
+
+    # plot effectivity index
+    plt.clf()
+    plt.title("Effectivity index")
+    plt.xlabel("DoFs")
+    plt.ylabel("Effectivity index")
+    plt.xscale("log")
+    plt.plot(list(convergence_table.keys()), [value["effectivity index"] for value in convergence_table.values()], color="blue", marker="o")
+    plt.show()
+
+    print("\nConvergence plot:")
+    for dof in convergence_table.keys():
+        print(f"({dof},{abs(convergence_table[dof]['J(u) - J(u_k)'])})", end="")
+    print("\n")
+
+    print("Effectivity index:")
+    for dof in convergence_table.keys():
+        print(f"({dof},{convergence_table[dof]['effectivity index']})", end="")
+    print("")
     
