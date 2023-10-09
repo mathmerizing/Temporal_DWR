@@ -186,12 +186,12 @@ def compute_error_estimator(mesh, primal_solutions, dual_solutions):
         #             for dG(0): I_k u_k is a linear interpolation of (t_{m-1}, u_k(t_{m-1})) and (t_m, u_k(t_m)) on the temporal element I_m = (t_{m-1}, t_m)
         #             for dG(1): I_k u_k can be implemented as a patch-wise interpolation of u_k from to neighboring temporal elements I_{m-1} = (t_{m-2}, t_{m-1}) and I_m = (t_{m-1}, t_m) onto \tilde{I}_m = (t_{m-2}, t_m) and then interpreting this (r+1)-degree polynomial as a dG(r+1) solution on I_{m-1} and I_m
 
-        # jump term: (u_k^{m} - u_k^{m-1}) * (I_k z_k - z_k)^+_{m-1}
+        # jump term: -(u_k^{m} - u_k^{m-1}) * (I_k z_k - z_k)^+_{m-1}
         values[i] -= (u-u_n) * (z_fine(element[0]) - z_coarse(element[0]))
 
         # mass term: (u_k^m, I_k z_k - z_k)           [trapezoidal rule for temporal integral]
         for w_q, t_q in zip([Δt / 2., Δt / 2.], [element[0], element[1]]): 
-            values[i] -= w_q * u * (z_fine(t_q) - z_coarse(t_q))
+            values[i] += w_q * u * (z_fine(t_q) - z_coarse(t_q))
 
     # copy error estimator on 1st temporal element to 0th temporal element
     values[0] = values[1]
@@ -221,48 +221,45 @@ def compute_analytical_error_estimator(mesh, primal_solutions, goal_functional):
         #      ∘ u_k: low-order in time primal solution (here: dG(0) / Backward Euler; in general: dG(r))
         #      ∘ z: analytical dual solution
 
-        # jump term: (u_k^{m} - u_k^{m-1}) * z^+_{m-1}
-        # TODO: comment in!
-        # values[i] -= (u-u_n) * z(element[0])
-        # print(f"values[{i}] = {values[i]}")
-        # print(f"values[{i}] = {np.power(1. / (1. - Δt), i) * (Δt / (1. - Δt)) * np.exp(1. - i * Δt)}")
+        # jump term: - (u_k^{m} - u_k^{m-1}) * z^+_{m-1}
+        jump = -(u-u_n) * z(element[0])
 
         # mass term: (u_k^m, z)           [Simpson's rule for temporal integral]
-        # tmp1 = 0.
+        # integral = 0.
         # for w_q, t_q in zip([Δt / 6., 2. * Δt / 3., Δt / 6.], [element[0], (element[0] + element[1]) / 2., element[1]]): 
-        #     tmp1 -= w_q * u * z(t_q)
+        #     integral += w_q * u * z(t_q)
 
-        # # integrate z using scipy.integrate.quad
-        # tmp2 = -u * quad(z, element[0], element[1])[0]
-        # values[i] += tmp2
-        #print(f"tmp1 = {tmp1}, tmp2 = {tmp2}")
+        # integrate (u_k^m, z) = u_k^m * (1, z) using scipy.integrate.quad
+        integral = u * quad(z, element[0], element[1])[0]
 
-        # tmp3 = np.power(1. / (1. - Δt), i+1) * (np.exp(1. - i * Δt) - np.exp(1. - (i+1) * Δt))
-        # print(f"tmp1 = {tmp1}, tmp3 = {tmp3}")
+        # for debugging (end time goal functional with uniform refinement):
+        # jump = -np.power(1. / (1. - Δt), i) * (Δt / (1. - Δt)) * np.exp(1. - i * Δt)
+        # integral = np.power(1. / (1. - Δt), i+1) * (np.exp(1. - i * Δt) - np.exp(1. - (i+1) * Δt))
 
-        jump = np.power(1. / (1. - Δt), i) * (Δt / (1. - Δt)) * np.exp(1. - i * Δt)
-        integral = -np.power(1. / (1. - Δt), i+1) * (np.exp(1. - i * Δt) - np.exp(1. - (i+1) * Δt))
-        values[i] = -jump -integral
+        values[i] = integral + jump
 
     return values
 
 if __name__ == "__main__":
     # get refinement type from cli
-    if len(sys.argv) != 3 or sys.argv[1] not in ["uniform", "adaptive"] or sys.argv[2] not in ["end_time", "time_integral"]:
-        print("Usage: python3 main.py <refinement_type> <goal_functional>")
+    if len(sys.argv) != 4 or sys.argv[1] not in ["uniform", "adaptive"] or sys.argv[2] not in ["end_time", "time_integral"]:
+        print("Usage: python3 main.py <refinement_type> <goal_functional> <analytical_dual>")
         print("  refinement_type: uniform, adaptive")
         print("  goal_functional: end_time, time_integral")
+        print("  analytical_dual: True, False")
         quit()
     refinement_type = sys.argv[1]
     goal_functional_type = sys.argv[2]
+    ANALYTICAL_DUAL = (sys.argv[3] == "True")
     print(f"Refinement type: {refinement_type}")
     print(f"Goal functional: {goal_functional_type}")
+    print(f"Analytical dual: {ANALYTICAL_DUAL}")
 
     # hyperparameters
     ERROR_TOL = 1e-14 # stopping criterion for DWR loop
-    MAX_DWR_ITERATIONS = 5 #10 #15 # 25
-    PLOT_ESTIMATOR = True #False
-    PLOT_SOLUTIONS = True #False
+    MAX_DWR_ITERATIONS = 20 #10 #15 # 25
+    PLOT_ESTIMATOR = False #True
+    PLOT_SOLUTIONS = False #True
     mesh = TemporalMesh(
         t0 = 0.0, # start time
         T = 1.0,  # end time
@@ -286,7 +283,8 @@ if __name__ == "__main__":
         elif goal_functional_type == "time_integral":
             J_reference = np.exp(1.) - 1.
         true_error = J_reference - goal_functional
-        print(f"  n_k:           {mesh.n_elements}")
+        print(f"  DoFs (n_k):    {mesh.n_elements}")
+        print(f"  J(u):          {J_reference:.8e}")
         print(f"  J(u_k):        {goal_functional:.8e}")
         print(f"  J(u) - J(u_k): {true_error:.8e}")
         # sanity check for uniform refinement and end time goal functional
@@ -300,10 +298,13 @@ if __name__ == "__main__":
             plot_solutions(mesh, primal_solutions, dual_solutions, goal_functional_type)
 
         print("Compute error estimator:")
-        error_estimator = compute_error_estimator(mesh, primal_solutions, dual_solutions)
-        # use analytical dual solution for error estimator to check correctness
-        error_estimator = compute_analytical_error_estimator(mesh, primal_solutions, goal_functional_type) 
-        # TODO: test error estimator with analytical dual solution
+        error_estimator = None
+        if not ANALYTICAL_DUAL:
+            # use dG(0) dual solution for error estimator
+            error_estimator = compute_error_estimator(mesh, primal_solutions, dual_solutions)
+        else:
+            # use analytical dual solution for error estimator to check correctness
+            error_estimator = compute_analytical_error_estimator(mesh, primal_solutions, goal_functional_type)
 
         # get the start and end time values for each temporal element
         start_times = np.array([mesh.mesh[i][0] for i in range(mesh.n_elements)])
@@ -317,10 +318,7 @@ if __name__ == "__main__":
             plt.ylabel("Error estimate")
             plt.show()
 
-        estimated_error = 0.
-        for i in range(mesh.n_elements):
-            estimated_error += error_estimator[i]
-        #estimated_error = np.sum(error_estimator)
+        estimated_error = np.sum(error_estimator)
         effectivity_index = true_error / estimated_error
         convergence_table[mesh.n_elements] = {
             "J(u_k)": goal_functional, 
@@ -368,3 +366,11 @@ if __name__ == "__main__":
             else:
                 print(f"Temporal adaptivity finished! (estimated error = {np.abs(np.sum(error_estimator))} < {ERROR_TOL})")
                 break
+    
+    print("\nConvergence table:")
+    print("==================\n")
+    print("DoFs (n_k) | J(u_k) | J(u) - J(u_k) | η_k | effectivity index")
+    print("-------------------------------------------------------------")
+    for key, value in convergence_table.items():
+        print(f"{key} | {value['J(u_k)']:.8e} | {value['J(u) - J(u_k)']:.8e} | {value['η_k']:.8e} | {value['effectivity index']:.8e}")
+    
