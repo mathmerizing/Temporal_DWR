@@ -68,7 +68,7 @@ def solve_primal(mesh):
     u = [1.] # u_0 = 1
     for element in mesh:
         # dG(0) approximation of ∂_t u - u = 0:
-        #      (1 - Δt) * u_n = u_{n-1
+        #      (1 - Δt) * u_n = u_{n-1}
         # <=>  u_n = u_{n-1} / (1 - Δt)
         Δt = element[1] - element[0]
         u.append(u[-1] / (1. - Δt))
@@ -241,7 +241,7 @@ def compute_analytical_error_estimator(mesh, primal_solutions, goal_functional):
         # print(f"tmp1 = {tmp1}, tmp3 = {tmp3}")
 
         jump = np.power(1. / (1. - Δt), i) * (Δt / (1. - Δt)) * np.exp(1. - i * Δt)
-        integral = np.power(1. / (1. - Δt), i+1) * (np.exp(1. - i * Δt) - np.exp(1. - (i+1) * Δt))
+        integral = -np.power(1. / (1. - Δt), i+1) * (np.exp(1. - i * Δt) - np.exp(1. - (i+1) * Δt))
         values[i] = -jump -integral
 
     return values
@@ -262,7 +262,7 @@ if __name__ == "__main__":
     ERROR_TOL = 1e-14 # stopping criterion for DWR loop
     MAX_DWR_ITERATIONS = 5 #10 #15 # 25
     PLOT_ESTIMATOR = True #False
-    PLOT_SOLUTIONS = False #True
+    PLOT_SOLUTIONS = True #False
     mesh = TemporalMesh(
         t0 = 0.0, # start time
         T = 1.0,  # end time
@@ -319,8 +319,7 @@ if __name__ == "__main__":
 
         estimated_error = 0.
         for i in range(mesh.n_elements):
-            # TODO: Why do we have to multiply by 0.25 * Δt?
-            estimated_error += 0.25 * error_estimator[i] * (end_times[i] - start_times[i])
+            estimated_error += error_estimator[i]
         #estimated_error = np.sum(error_estimator)
         effectivity_index = true_error / estimated_error
         convergence_table[mesh.n_elements] = {
