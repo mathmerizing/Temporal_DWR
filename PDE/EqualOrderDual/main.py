@@ -68,26 +68,32 @@ class TemporalMesh:
         for i, element in enumerate(self.mesh):
             print(f"I_{i} = ({element[0]}, {element[1]})")
         
-# primal right hand side function
-class PrimalRHSExpression(UserExpression):
-    _t = 0.
-
-    def set_time(self, t):
-        self._t = t
-
+# indicator function for upper half of domain
+class IndicatorUpperHalf(UserExpression):
     def eval_cell(self, value, x, _):
-        if ((x[0] - 0.5 - 0.25 * np.cos(2. * np.pi * self._t))**2 + (x[1] - 0.5 - 0.25 * np.sin(2. * np.pi * self._t))**2 < 0.125**2):
-            value[0] = np.sin(4. * np.pi * self._t)
+        if (x[1] > 0.5):
+            value[0] = 1.
         else:
             value[0] = 0.
 
     def value_shape(self):
         return ()  # scalar function
     
-# indicator function for upper half of domain
-class IndicatorExpression(UserExpression):
+# indicator function for first quadrant of domain
+class IndicatorFirstQuadrant(UserExpression):
     def eval_cell(self, value, x, _):
-        if (x[1] > 0.5):
+        if (x[0] > 0.5 and x[1] > 0.5):
+            value[0] = 1.
+        else:
+            value[0] = 0.
+
+    def value_shape(self):
+        return ()  # scalar function
+    
+# indicator function for third quadrant of domain
+class IndicatorThirdQuadrant(UserExpression):
+    def eval_cell(self, value, x, _):
+        if (x[0] < 0.5 and x[1] < 0.5):
             value[0] = 1.
         else:
             value[0] = 0.
@@ -124,10 +130,13 @@ class SpatialFE:
             shape=(self.V.dim(), self.V.dim()),
         )
 
-        self.rhs = PrimalRHSExpression() # right hand side for primal problem
-        self.indicator = IndicatorExpression() # indicator function for upper half of domain
+        self.indicator_upper_half = IndicatorUpperHalf() # indicator function for upper half of domain
+        self.indicator_first_quadrant = IndicatorFirstQuadrant() # indicator function for first quadrant of domain
+        self.indicator_third_quadrant = IndicatorThirdQuadrant() # indicator function for third quadrant of domain
 
-        self.goal_functional_vector = np.array(assemble(self.v * self.indicator * dx))
+        self.goal_functional_vector = np.array(assemble(self.v * self.indicator_upper_half * dx))
+        self.first_quadrant_vector = np.array(assemble(self.v * self.indicator_first_quadrant * dx))
+        self.third_quadrant_vector = np.array(assemble(self.v * self.indicator_third_quadrant * dx))
 
         self.boundary_dof_vector = np.zeros((self.V.dim(),))
         for i, val in self.bc.get_boundary_values().items():
@@ -174,8 +183,11 @@ class SpatialFE:
                     self.system_matrix[Δt]
                 )
 
-            self.rhs.set_time(temporal_element[1])
-            rhs_vector = self.mass_matrix.dot(u_n) + Δt * np.array(assemble(self.rhs * self.v * dx))
+            rhs_vector = self.mass_matrix.dot(u_n)
+            if temporal_element[1] <= 0.5:
+                rhs_vector += Δt * self.first_quadrant_vector
+            elif temporal_element[0] >= 1. and temporal_element[1] <= 1.5:
+                rhs_vector += Δt * self.third_quadrant_vector
 
             # apply homogeneous Dirichlet BC to right hand side
             rhs_vector = rhs_vector * (1.0 - self.boundary_dof_vector)
@@ -337,17 +349,23 @@ class SpatialFE:
             # assemble individual terms of residual and apply boundary conditions
             residual_jump = -self.mass_matrix.dot(u - u_n) * (1.0 - self.boundary_dof_vector)
             residual_laplace = - 0.5 * Δt * self.laplace_matrix.dot(u) * (1.0 - self.boundary_dof_vector)
-            self.rhs.set_time(temporal_element[0])
-            residual_rhs0 = 0.5 * Δt * np.array(assemble(self.rhs * self.v * dx)) * (1.0 - self.boundary_dof_vector)
-            self.rhs.set_time(temporal_element[1])
-            residual_rhs1 = 0.5 * Δt * np.array(assemble(self.rhs * self.v * dx)) * (1.0 - self.boundary_dof_vector)
+            residual_rhs = np.zeros((self.V.dim(),))
+            if temporal_element[1] <= 0.5:
+                residual_rhs = Δt * self.first_quadrant_vector * (1.0 - self.boundary_dof_vector)
+            elif temporal_element[0] >= 1. and temporal_element[1] <= 1.5:
+                residual_rhs = Δt * self.third_quadrant_vector * (1.0 - self.boundary_dof_vector)
+
+            # self.rhs.set_time(temporal_element[0])
+            # residual_rhs0 = 0.5 * Δt * np.array(assemble(self.rhs * self.v * dx)) * (1.0 - self.boundary_dof_vector)
+            # self.rhs.set_time(temporal_element[1])
+            # residual_rhs1 = 0.5 * Δt * np.array(assemble(self.rhs * self.v * dx)) * (1.0 - self.boundary_dof_vector)
 
             # multiply residual parts with dual solution
             values[i] += np.dot(residual_jump, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
             values[i] += np.dot(residual_laplace, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
             values[i] += np.dot(residual_laplace, z_fine(temporal_element[1]) - z_coarse(temporal_element[1]))
-            values[i] += np.dot(residual_rhs0, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
-            values[i] += np.dot(residual_rhs1, z_fine(temporal_element[1]) - z_coarse(temporal_element[1]))
+            values[i] += 0.5 * np.dot(residual_rhs, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
+            values[i] += 0.5 * np.dot(residual_rhs, z_fine(temporal_element[1]) - z_coarse(temporal_element[1]))
 
         # for debugging:
         # print(f"laplace: {np.sum(laplace)}")
@@ -367,12 +385,12 @@ if __name__ == "__main__":
 
     # hyperparameters
     ERROR_TOL = 1e-14 # stopping criterion for DWR loop
-    MAX_DWR_ITERATIONS = 3 #5
+    MAX_DWR_ITERATIONS = 11
     PLOT_ESTIMATOR = False
     temporal_mesh = TemporalMesh(
         t0 = 0.0, # start time 
         T = 2.0, # end time
-        Δt = 0.05 #0.125 # initial uniform time step size
+        Δt = 0.125 # initial uniform time step size
     )
     spatial_fe = SpatialFE()
 
@@ -397,7 +415,8 @@ if __name__ == "__main__":
 
         print("Compute goal functional:")
         goal_functional = spatial_fe.compute_goal_functional(temporal_mesh.mesh, primal_solutions)
-        J_reference = 3.058290061946076e-05 # reference from uniform refinement with 262,144 temporal elements
+        #J_reference = 3.058290061946076e-05 # reference from uniform refinement with 262,144 temporal elements
+        J_reference = 4.26326261e-03 # reference from uniform refinement with 131,072 temporal elements
         true_error = J_reference - goal_functional
         print(f"  n_k:           {temporal_mesh.n_elements}")
         print(f"  J(u_k):        {goal_functional:.8e}")
