@@ -9,6 +9,7 @@ from fenics import *
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import scipy
 from tabulate import tabulate
 import sys
 
@@ -105,23 +106,49 @@ class SpatialFE:
         self.mass_form = self.u * self.v * dx
         self.laplace_form = inner(grad(self.u), grad(self.v)) * dx
 
+        # assemble matrices and convert to scipy.sparse matrices
+        self.mass_matrix =  scipy.sparse.csr_matrix(
+            as_backend_type(
+                assemble(self.mass_form)
+            )
+            .mat()
+            .getValuesCSR()[::-1],
+            shape=(self.V.dim(), self.V.dim()),
+        )
+        self.laplace_matrix =  scipy.sparse.csr_matrix(
+            as_backend_type(
+                assemble(self.laplace_form)
+            )
+            .mat()
+            .getValuesCSR()[::-1],
+            shape=(self.V.dim(), self.V.dim()),
+        )
+
         self.rhs = PrimalRHSExpression() # right hand side for primal problem
         self.indicator = IndicatorExpression() # indicator function for upper half of domain
 
         self.goal_functional_vector = np.array(assemble(self.v * self.indicator * dx))
 
+        self.boundary_dof_vector = np.zeros((self.V.dim(),))
+        for i, val in self.bc.get_boundary_values().items():
+            self.boundary_dof_vector[i] = 1.0
+
+        # store matrices and its factorizations for each time step size for faster solve
+        self.system_matrix = {}
+        self.solve_factorized = {}
+
     def solve_primal(self, temporal_mesh):
         solutions = []
 
         # initial condition
-        u_0 = Constant(0.)
+        u_0 = np.zeros((self.V.dim(),))
         # u_n: solution from last time step
-        u_n = interpolate(u_0, self.V)
+        u_n = u_0.copy()
         # solution on current time step
-        u = Function(self.V)
+        u = np.zeros((self.V.dim(),))
 
         # store initial condition as numpy array
-        solutions.append(np.array(u_n.vector()))
+        solutions.append(u_n.copy())
 
         # for each temporal element:
         #    solve forward in time with backward Euler
@@ -129,22 +156,42 @@ class SpatialFE:
             # print(f"Solve primal on I_{i} = ({temporal_element[0]}, {temporal_element[1]})")
 
             Δt = temporal_element[1] - temporal_element[0]
-            L = u_n*self.v*dx
-            for w_q, t_q in zip([Δt], [temporal_element[1]]):
-                self.rhs.set_time(t_q)
-                L += w_q * self.rhs * self.v * dx
-            solve(self.mass_form + Δt*self.laplace_form == L, u, self.bc)
+            for dt in self.solve_factorized.keys():
+                if np.abs(dt - Δt) < 1e-8:
+                    Δt = dt
+                    break
+            else:
+                print(f"Factorize matrix for Δt = {Δt}")
+                # store system matrix with enforced homogeneous Dirichlet BC
+                self.system_matrix[Δt] = (
+                    (
+                        self.mass_matrix + Δt*self.laplace_matrix
+                    ).multiply((1.0 - self.boundary_dof_vector).reshape(-1, 1)) + scipy.sparse.diags(self.boundary_dof_vector)
+                ).tocsc()
+
+                # factorize system matrix
+                self.solve_factorized[Δt] = scipy.sparse.linalg.factorized(
+                    self.system_matrix[Δt]
+                )
+
+            self.rhs.set_time(temporal_element[1])
+            rhs_vector = self.mass_matrix.dot(u_n) + Δt * np.array(assemble(self.rhs * self.v * dx))
+
+            # apply homogeneous Dirichlet BC to right hand side
+            rhs_vector = rhs_vector * (1.0 - self.boundary_dof_vector)
+
+            u = self.solve_factorized[Δt](rhs_vector)
 
             # store solution as numpy array
-            solutions.append(np.array(u.vector()))
+            solutions.append(u.copy())
 
             # c = plot(u)
             # plt.colorbar(c)
             # plot(self.mesh)
             # plt.show()
 
-            u_n.assign(u)
-        
+            u_n = u.copy()
+            
         return solutions
     
     def solve_dual(self, temporal_mesh, primal_solutions):
@@ -153,14 +200,14 @@ class SpatialFE:
         solutions = []
 
         # initial condition
-        z_0 = Constant(0.)
+        z_M = np.zeros((self.V.dim(),))
         # z_n: solution from next time step
-        z_n = interpolate(z_0, self.V)
+        z_n = z_M.copy()
         # solution on current time step
-        z = Function(self.V)
+        z = np.zeros((self.V.dim(),))
 
         # store initial condition as numpy array
-        solutions.append(np.array(z_n.vector()))
+        solutions.append(z_n.copy())
 
         # for each temporal element:
         #    solve backward in time with backward Euler
@@ -168,16 +215,28 @@ class SpatialFE:
             # print(f"Solve dual on I_{i} = ({temporal_element[0]}, {temporal_element[1]})")
             
             Δt = temporal_element[1] - temporal_element[0]
-            solve(self.mass_form + Δt*self.laplace_form == z_n*self.v*dx + Δt*self.indicator*self.v*dx, z, self.bc)
+            for dt in self.solve_factorized.keys():
+                if np.abs(dt - Δt) < 1e-8:
+                    Δt = dt
+                    break
+            else:
+                raise "Factorized matrix for Δt not found! (This should not happen!)"
+
+            rhs_vector = self.mass_matrix.dot(z_n) + Δt * self.goal_functional_vector
+
+            # apply homogeneous Dirichlet BC to right hand side
+            rhs_vector = rhs_vector * (1.0 - self.boundary_dof_vector)
+
+            z = self.solve_factorized[Δt](rhs_vector)
 
             # store solution as numpy array
-            solutions.append(np.array(z.vector()))
+            solutions.append(z.copy())
 
             # c = plot(z)
             # plt.colorbar(c)
             # plt.show()
 
-            z_n.assign(z)
+            z_n = z.copy()
         
         return solutions[::-1] # sort solutions from t = t0 to t = T
     
@@ -197,42 +256,33 @@ class SpatialFE:
         jump = np.zeros(len(temporal_mesh))
         rhs = np.zeros(len(temporal_mesh))
 
-        u = Function(self.V)   # u^{n+1}
-        u_n = Function(self.V) # u^n
-        z = Function(self.V)   # z^{n+1}
-        z_n = Function(self.V) # z^n
+        # TODO: make this all in numpy and scipy!!!
+
+        u = np.zeros((self.V.dim(),))   # u^{n+1}
+        u_n = np.zeros((self.V.dim(),)) # u^n
+        z = np.zeros((self.V.dim(),))   # z^{n+1}
+        z_n = np.zeros((self.V.dim(),)) # z^n
         for i, temporal_element in enumerate(tqdm(temporal_mesh)):
             Δt = temporal_element[1] - temporal_element[0]
-            u.vector()[:] = primal_solutions[i+1]
-            u_n.vector()[:] = primal_solutions[i]
+            u = primal_solutions[i+1]
+            u_n = primal_solutions[i]
 
-            z.vector()[:] = dual_solutions[i]
+            z = dual_solutions[i]
             if i > 0:
-                z_n.vector()[:] = dual_solutions[i-1]
+                z_n = dual_solutions[i-1]
             else:
-                z_n.vector()[:] = dual_solutions[i]
-
-            _z = dual_solutions[i]
-            _z_n = None
-            if i > 0:
-                _z_n = dual_solutions[i-1]
-            else:
-                _z_n = dual_solutions[i]
+                z_n = dual_solutions[i]
             
             # I_k z_k: for dG(0) this is a linear interpolation between z_k(t_{m-1}) and z_k(t_m) on the temporal element I_m = (t_{m-1}, t_m)
             def z_fine(t):
                 assert t >= temporal_element[0] and t <= temporal_element[1]
-                z_fine = Function(self.V)
-                z_fine.vector()[:] = _z_n + (_z - _z_n) * (t - temporal_element[0]) / Δt
-                return z_fine
-
+                return z_n + (z - z_n) * (t - temporal_element[0]) / Δt
+                
             # z_k: for dG(0) this is a constant function on the temporal element I_m = (t_{m-1}, t_m)
             def z_coarse(t):
                 assert t >= temporal_element[0] and t <= temporal_element[1]
-                z_coarse = Function(self.V)
-                z_coarse.vector()[:] = _z
-                return z_coarse
-            
+                return z
+                
             # primal residual based error estimator:
             #   J(u) - J(u_k) ≈ η := ρ(u_k)(I_k z_k - z_k)
             #      ∘ η: error estimator
@@ -256,25 +306,25 @@ class SpatialFE:
             #   ρ(u_k)(I_k z_k - z_k) = (Δt / 2) * ( (f^m, z_k^m - z_k^{m-1}) - (∇_x u_k^m, z_k^m - z_k^{m-1}) ) 
 
             # jump term: (u_k^{m} - u_k^{m-1}) * (I_k z_k - z_k)^+_{m-1}
-            values[i] -= assemble((u-u_n) * (z_fine(temporal_element[0]) - z_coarse(temporal_element[0])) * dx)
+            #values[i] -= assemble((u-u_n) * (z_fine(temporal_element[0]) - z_coarse(temporal_element[0])) * dx)
             # for debugging:
-            jump[i] += assemble((u-u_n) * (z_fine(temporal_element[0]) - z_coarse(temporal_element[0])) * dx)
+            # jump[i] += assemble((u-u_n) * (z_fine(temporal_element[0]) - z_coarse(temporal_element[0])) * dx)
 
-            # laplace term: (∇_x u_k^m, I_k z_k - z_k)           [trapezoidal rule for temporal integral]
-            for w_q, t_q in zip([Δt / 2., Δt / 2.], [temporal_element[0], temporal_element[1]]): 
-                values[i] -= w_q * assemble(inner(grad(u), grad(z_fine(t_q) - z_coarse(t_q))) * dx)
-                # for debugging:
-                laplace[i] += w_q * assemble(inner(grad(u), grad(z_fine(t_q) - z_coarse(t_q))) * dx)
+            # # laplace term: (∇_x u_k^m, I_k z_k - z_k)           [trapezoidal rule for temporal integral]
+            # for w_q, t_q in zip([Δt / 2., Δt / 2.], [temporal_element[0], temporal_element[1]]): 
+            #     #values[i] -= w_q * assemble(inner(grad(u), grad(z_fine(t_q) - z_coarse(t_q))) * dx)
+            #     # for debugging:
+            #     laplace[i] += w_q * assemble(inner(grad(u), grad(z_fine(t_q) - z_coarse(t_q))) * dx)
 
-            #  values[i] += - assemble((u - u_n) * (z - z_n) * dx) - (Δt / 2.) * assemble(inner(grad(u), grad(z - z_n)) * dx)
+            # #  values[i] += - assemble((u - u_n) * (z - z_n) * dx) - (Δt / 2.) * assemble(inner(grad(u), grad(z - z_n)) * dx)
 
-            # right hand side term: (f^m, I_k z_k - z_k)           [Simpson's rule for temporal integral]
-            # Simpson: for w_q, t_q in zip([Δt / 6., 4. * Δt / 6., Δt / 6.], [temporal_element[0], (temporal_element[0] + temporal_element[1]) / 2., temporal_element[1]]):
-            for w_q, t_q in zip([Δt / 2., Δt / 2.], [temporal_element[0], temporal_element[1]]):
-                self.rhs.set_time(t_q) # temporal_element[1])
-                values[i] += w_q * assemble(self.rhs * (z_fine(t_q) - z_coarse(t_q)) * dx)
-                # for debugging:
-                rhs[i] += w_q * assemble(self.rhs * (z_fine(t_q) - z_coarse(t_q)) * dx)
+            # # right hand side term: (f^m, I_k z_k - z_k)           [Simpson's rule for temporal integral]
+            # # Simpson: for w_q, t_q in zip([Δt / 6., 4. * Δt / 6., Δt / 6.], [temporal_element[0], (temporal_element[0] + temporal_element[1]) / 2., temporal_element[1]]):
+            # for w_q, t_q in zip([Δt / 2., Δt / 2.], [temporal_element[0], temporal_element[1]]):
+            #     self.rhs.set_time(t_q) # temporal_element[1])
+            #     #values[i] += w_q * assemble(self.rhs * (z_fine(t_q) - z_coarse(t_q)) * dx)
+            #     # for debugging:
+            #     rhs[i] += w_q * assemble(self.rhs * (z_fine(t_q) - z_coarse(t_q)) * dx)
 
             # self.rhs.set_time(temporal_element[0])
             # values[i] += (Δt / 2.) * assemble(self.rhs * (z - z_n) * dx)
@@ -284,12 +334,27 @@ class SpatialFE:
             # self.rhs.set_time(temporal_element[0])
             # values[i] -= (Δt / 2.) * assemble(self.rhs * z_n * dx)
 
-        # for debugging:
-        print(f"laplace: {np.sum(laplace)}")
-        print(f"jump: {np.sum(jump)}")
-        print(f"rhs: {np.sum(rhs)}")
+            # assemble individual terms of residual and apply boundary conditions
+            residual_jump = -self.mass_matrix.dot(u - u_n) * (1.0 - self.boundary_dof_vector)
+            residual_laplace = - 0.5 * Δt * self.laplace_matrix.dot(u) * (1.0 - self.boundary_dof_vector)
+            self.rhs.set_time(temporal_element[0])
+            residual_rhs0 = 0.5 * Δt * np.array(assemble(self.rhs * self.v * dx)) * (1.0 - self.boundary_dof_vector)
+            self.rhs.set_time(temporal_element[1])
+            residual_rhs1 = 0.5 * Δt * np.array(assemble(self.rhs * self.v * dx)) * (1.0 - self.boundary_dof_vector)
 
-        return -laplace-jump+rhs #values
+            # multiply residual parts with dual solution
+            values[i] += np.dot(residual_jump, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
+            values[i] += np.dot(residual_laplace, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
+            values[i] += np.dot(residual_laplace, z_fine(temporal_element[1]) - z_coarse(temporal_element[1]))
+            values[i] += np.dot(residual_rhs0, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
+            values[i] += np.dot(residual_rhs1, z_fine(temporal_element[1]) - z_coarse(temporal_element[1]))
+
+        # for debugging:
+        # print(f"laplace: {np.sum(laplace)}")
+        # print(f"jump: {np.sum(jump)}")
+        # print(f"rhs: {np.sum(rhs)}")
+
+        return values #-laplace-jump+rhs
 
 if __name__ == "__main__":
     # get refinement type from cli
