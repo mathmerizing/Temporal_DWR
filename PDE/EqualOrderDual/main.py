@@ -197,7 +197,9 @@ class SpatialFE:
             # store solution as numpy array
             solutions.append(u.copy())
 
-            # c = plot(u)
+            # U = Function(self.V)
+            # U.vector()[:] = u
+            # c = plot(U)
             # plt.colorbar(c)
             # plot(self.mesh)
             # plt.show()
@@ -263,12 +265,6 @@ class SpatialFE:
     
     def compute_error_estimator(self, temporal_mesh, primal_solutions, dual_solutions):
         values = np.zeros(len(temporal_mesh))
-        # for debugging:
-        laplace = np.zeros(len(temporal_mesh))
-        jump = np.zeros(len(temporal_mesh))
-        rhs = np.zeros(len(temporal_mesh))
-
-        # TODO: make this all in numpy and scipy!!!
 
         u = np.zeros((self.V.dim(),))   # u^{n+1}
         u_n = np.zeros((self.V.dim(),)) # u^n
@@ -309,70 +305,26 @@ class SpatialFE:
             # And consequently:
             #    I_k z_k - z_k = (z_k(t_m) - z_k(t_{m-1})) * (t - t_{m-1}) / (t_m - t_{m-1})   for t ∈ I_m = (t_{m-1}, t_m)
             # For the evaluation of the primal residual, we need to exactly integrate constant functions in time => trapezoidal rule is enough for quadrature of the temporal integral
-            # The jump terms in the primal residual are zero because (I_k z_k - z_k)^+_{m-1} = 0 on I_m.
             # The time derivative of u_k is zero because u_k is a dG(0) solution.
-            # Hence, only laplace term and the right hand side remain in the primal residual.
-            # Using the trapezoidal rule for the temporal integral, we get:
-
-            # TODO: adapt theory here!!!
-            #   ρ(u_k)(I_k z_k - z_k) = (Δt / 2) * ( (f^m, z_k^m - z_k^{m-1}) - (∇_x u_k^m, z_k^m - z_k^{m-1}) ) 
-
-            # jump term: (u_k^{m} - u_k^{m-1}) * (I_k z_k - z_k)^+_{m-1}
-            #values[i] -= assemble((u-u_n) * (z_fine(temporal_element[0]) - z_coarse(temporal_element[0])) * dx)
-            # for debugging:
-            # jump[i] += assemble((u-u_n) * (z_fine(temporal_element[0]) - z_coarse(temporal_element[0])) * dx)
-
-            # # laplace term: (∇_x u_k^m, I_k z_k - z_k)           [trapezoidal rule for temporal integral]
-            # for w_q, t_q in zip([Δt / 2., Δt / 2.], [temporal_element[0], temporal_element[1]]): 
-            #     #values[i] -= w_q * assemble(inner(grad(u), grad(z_fine(t_q) - z_coarse(t_q))) * dx)
-            #     # for debugging:
-            #     laplace[i] += w_q * assemble(inner(grad(u), grad(z_fine(t_q) - z_coarse(t_q))) * dx)
-
-            # #  values[i] += - assemble((u - u_n) * (z - z_n) * dx) - (Δt / 2.) * assemble(inner(grad(u), grad(z - z_n)) * dx)
-
-            # # right hand side term: (f^m, I_k z_k - z_k)           [Simpson's rule for temporal integral]
-            # # Simpson: for w_q, t_q in zip([Δt / 6., 4. * Δt / 6., Δt / 6.], [temporal_element[0], (temporal_element[0] + temporal_element[1]) / 2., temporal_element[1]]):
-            # for w_q, t_q in zip([Δt / 2., Δt / 2.], [temporal_element[0], temporal_element[1]]):
-            #     self.rhs.set_time(t_q) # temporal_element[1])
-            #     #values[i] += w_q * assemble(self.rhs * (z_fine(t_q) - z_coarse(t_q)) * dx)
-            #     # for debugging:
-            #     rhs[i] += w_q * assemble(self.rhs * (z_fine(t_q) - z_coarse(t_q)) * dx)
-
-            # self.rhs.set_time(temporal_element[0])
-            # values[i] += (Δt / 2.) * assemble(self.rhs * (z - z_n) * dx)
-
-            # self.rhs.set_time(temporal_element[1])
-            # values[i] += (Δt / 2.) * assemble(self.rhs * z * dx)
-            # self.rhs.set_time(temporal_element[0])
-            # values[i] -= (Δt / 2.) * assemble(self.rhs * z_n * dx)
 
             # assemble individual terms of residual and apply boundary conditions
             residual_jump = -self.mass_matrix.dot(u - u_n) * (1.0 - self.boundary_dof_vector)
             residual_laplace = - 0.5 * Δt * self.laplace_matrix.dot(u) * (1.0 - self.boundary_dof_vector)
+            # NOTE: Here the assembly of the RHS term is easy because the RHS is element-wise constant in time
             residual_rhs = np.zeros((self.V.dim(),))
             if temporal_element[1] <= 0.5:
                 residual_rhs = Δt * self.first_quadrant_vector * (1.0 - self.boundary_dof_vector)
             elif temporal_element[0] >= 1. and temporal_element[1] <= 1.5:
                 residual_rhs = Δt * self.third_quadrant_vector * (1.0 - self.boundary_dof_vector)
 
-            # self.rhs.set_time(temporal_element[0])
-            # residual_rhs0 = 0.5 * Δt * np.array(assemble(self.rhs * self.v * dx)) * (1.0 - self.boundary_dof_vector)
-            # self.rhs.set_time(temporal_element[1])
-            # residual_rhs1 = 0.5 * Δt * np.array(assemble(self.rhs * self.v * dx)) * (1.0 - self.boundary_dof_vector)
-
-            # multiply residual parts with dual solution
+           # multiply residual parts with dual solution
             values[i] += np.dot(residual_jump, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
             values[i] += np.dot(residual_laplace, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
             values[i] += np.dot(residual_laplace, z_fine(temporal_element[1]) - z_coarse(temporal_element[1]))
             values[i] += 0.5 * np.dot(residual_rhs, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
             values[i] += 0.5 * np.dot(residual_rhs, z_fine(temporal_element[1]) - z_coarse(temporal_element[1]))
 
-        # for debugging:
-        # print(f"laplace: {np.sum(laplace)}")
-        # print(f"jump: {np.sum(jump)}")
-        # print(f"rhs: {np.sum(rhs)}")
-
-        return values #-laplace-jump+rhs
+        return values
 
 if __name__ == "__main__":
     # get refinement type from cli
@@ -385,8 +337,12 @@ if __name__ == "__main__":
 
     # hyperparameters
     ERROR_TOL = 1e-14 # stopping criterion for DWR loop
-    MAX_DWR_ITERATIONS = 11
-    PLOT_ESTIMATOR = False
+    MAX_DWR_ITERATIONS = 1
+    if refinement_type == "uniform":
+        MAX_DWR_ITERATIONS = 11
+    elif refinement_type == "adaptive":
+        MAX_DWR_ITERATIONS = 26
+    PLOT_ESTIMATOR = False # True
     temporal_mesh = TemporalMesh(
         t0 = 0.0, # start time 
         T = 2.0, # end time
@@ -450,8 +406,6 @@ if __name__ == "__main__":
         }
         print(f"  η_k: {estimated_error}")
         print(f"  effectivity index: {effectivity_index:.8e}")
-        print("   TODO: debug estimator")
-        # TODO: debug error estimator
 
         if refinement_type == "uniform":
             # uniform refinement in time
@@ -490,14 +444,41 @@ if __name__ == "__main__":
             else:
                 print(f"Temporal adaptivity finished! (estimated error = {np.abs(np.sum(error_estimator))} < {ERROR_TOL})")
                 break
+
+    # if using adaptive refinement
+    if refinement_type == "adaptive":
+        temporal_mesh.plot_mesh()
+
+    # print convergence table as tabulate
+    for tablefmt in ["simple", "latex"]:
+        table = tabulate([[row[0], *row[1].values()] for row in convergence_table.items()], headers=["#DoFs", "$J(u_k)$", "$J(u) - J(u_k)$", "$\eta_k$", "$I_{eff}$"], tablefmt=tablefmt)
+        print(table)
     
-    # print convergence table using pandas and scientific notation
-    import pandas as pd
-    print("\nConvergence table:")
-    print("==================\n")
-    pd.set_option('display.float_format', lambda x: f"{x:.3e}")
-    print(pd.DataFrame.from_dict(convergence_table, orient='index'))
+    # plot convergence table
+    plt.clf()
+    plt.title("Convergence table")
+    plt.xlabel("DoFs")
+    plt.ylabel("True error")
+    plt.xscale("log")
+    plt.yscale("log")
+    plt.plot(list(convergence_table.keys()), [abs(value["J(u) - J(u_k)"]) for value in convergence_table.values()], color="blue", marker="o")
+    plt.show()
 
+    # plot effectivity index
+    plt.clf()
+    plt.title("Effectivity index")
+    plt.xlabel("DoFs")
+    plt.ylabel("Effectivity index")
+    plt.xscale("log")
+    plt.plot(list(convergence_table.keys()), [value["effectivity index"] for value in convergence_table.values()], color="blue", marker="o")
+    plt.show()
 
-        
-        
+    print("\nConvergence plot:")
+    for dof in convergence_table.keys():
+        print(f"({dof},{abs(convergence_table[dof]['J(u) - J(u_k)'])})", end="")
+    print("\n")
+
+    print("Effectivity index:")
+    for dof in convergence_table.keys():
+        print(f"({dof},{convergence_table[dof]['effectivity index']})", end="")
+    print("")
