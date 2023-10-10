@@ -9,6 +9,7 @@ from fenics import *
 import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from tabulate import tabulate
 import sys
 
 set_log_active(False) # turn off FEniCS logging
@@ -95,7 +96,7 @@ class IndicatorExpression(UserExpression):
 
 class SpatialFE:
     def __init__(self):
-        self.mesh = UnitSquareMesh(50, 50)
+        self.mesh = UnitSquareMesh(50, 50) #20, 20)
         self.V = FunctionSpace(self.mesh, 'P', 1) # linear FE in space
         self.bc = DirichletBC(self.V, Constant(0.), lambda _, on_boundary: on_boundary) # homogeneous Dirichlet BC everywhere
         self.u = TrialFunction(self.V)
@@ -106,6 +107,8 @@ class SpatialFE:
 
         self.rhs = PrimalRHSExpression() # right hand side for primal problem
         self.indicator = IndicatorExpression() # indicator function for upper half of domain
+
+        self.goal_functional_vector = np.array(assemble(self.v * self.indicator * dx))
 
     def solve_primal(self, temporal_mesh):
         solutions = []
@@ -137,6 +140,7 @@ class SpatialFE:
 
             # c = plot(u)
             # plt.colorbar(c)
+            # plot(self.mesh)
             # plt.show()
 
             u_n.assign(u)
@@ -180,26 +184,27 @@ class SpatialFE:
     def compute_goal_functional(self, temporal_mesh, primal_solutions):
         value = 0.
 
-        u = Function(self.V)
         for temporal_element, solution in tqdm(list(zip(temporal_mesh, primal_solutions[1:]))):
-            u.vector()[:] = solution
             Δt = temporal_element[1] - temporal_element[0]
-            value += Δt*assemble(u * self.indicator * dx)
+            value += Δt * np.dot(solution, self.goal_functional_vector)
 
         return value
     
     def compute_error_estimator(self, temporal_mesh, primal_solutions, dual_solutions):
         values = np.zeros(len(temporal_mesh))
+        # for debugging:
+        laplace = np.zeros(len(temporal_mesh))
+        jump = np.zeros(len(temporal_mesh))
+        rhs = np.zeros(len(temporal_mesh))
 
         u = Function(self.V)   # u^{n+1}
         u_n = Function(self.V) # u^n
         z = Function(self.V)   # z^{n+1}
         z_n = Function(self.V) # z^n
         for i, temporal_element in enumerate(tqdm(temporal_mesh)):
+            Δt = temporal_element[1] - temporal_element[0]
             u.vector()[:] = primal_solutions[i+1]
             u_n.vector()[:] = primal_solutions[i]
-            # z.vector()[:] = dual_solutions[i+1]
-            # z_n.vector()[:] = dual_solutions[i]
 
             z.vector()[:] = dual_solutions[i]
             if i > 0:
@@ -218,7 +223,7 @@ class SpatialFE:
             def z_fine(t):
                 assert t >= temporal_element[0] and t <= temporal_element[1]
                 z_fine = Function(self.V)
-                z_fine.vector()[:] = _z_n + (_z - _z_n) * (t - temporal_element[0]) / (temporal_element[1] - temporal_element[0])
+                z_fine.vector()[:] = _z_n + (_z - _z_n) * (t - temporal_element[0]) / Δt
                 return z_fine
 
             # z_k: for dG(0) this is a constant function on the temporal element I_m = (t_{m-1}, t_m)
@@ -227,8 +232,6 @@ class SpatialFE:
                 z_coarse = Function(self.V)
                 z_coarse.vector()[:] = _z
                 return z_coarse
-
-            Δt = temporal_element[1] - temporal_element[0]
             
             # primal residual based error estimator:
             #   J(u) - J(u_k) ≈ η := ρ(u_k)(I_k z_k - z_k)
@@ -254,18 +257,24 @@ class SpatialFE:
 
             # jump term: (u_k^{m} - u_k^{m-1}) * (I_k z_k - z_k)^+_{m-1}
             values[i] -= assemble((u-u_n) * (z_fine(temporal_element[0]) - z_coarse(temporal_element[0])) * dx)
+            # for debugging:
+            jump[i] += assemble((u-u_n) * (z_fine(temporal_element[0]) - z_coarse(temporal_element[0])) * dx)
 
             # laplace term: (∇_x u_k^m, I_k z_k - z_k)           [trapezoidal rule for temporal integral]
             for w_q, t_q in zip([Δt / 2., Δt / 2.], [temporal_element[0], temporal_element[1]]): 
                 values[i] -= w_q * assemble(inner(grad(u), grad(z_fine(t_q) - z_coarse(t_q))) * dx)
+                # for debugging:
+                laplace[i] += w_q * assemble(inner(grad(u), grad(z_fine(t_q) - z_coarse(t_q))) * dx)
 
             #  values[i] += - assemble((u - u_n) * (z - z_n) * dx) - (Δt / 2.) * assemble(inner(grad(u), grad(z - z_n)) * dx)
 
             # right hand side term: (f^m, I_k z_k - z_k)           [Simpson's rule for temporal integral]
             # Simpson: for w_q, t_q in zip([Δt / 6., 4. * Δt / 6., Δt / 6.], [temporal_element[0], (temporal_element[0] + temporal_element[1]) / 2., temporal_element[1]]):
             for w_q, t_q in zip([Δt / 2., Δt / 2.], [temporal_element[0], temporal_element[1]]):
-                self.rhs.set_time(t_q)
+                self.rhs.set_time(t_q) # temporal_element[1])
                 values[i] += w_q * assemble(self.rhs * (z_fine(t_q) - z_coarse(t_q)) * dx)
+                # for debugging:
+                rhs[i] += w_q * assemble(self.rhs * (z_fine(t_q) - z_coarse(t_q)) * dx)
 
             # self.rhs.set_time(temporal_element[0])
             # values[i] += (Δt / 2.) * assemble(self.rhs * (z - z_n) * dx)
@@ -275,7 +284,12 @@ class SpatialFE:
             # self.rhs.set_time(temporal_element[0])
             # values[i] -= (Δt / 2.) * assemble(self.rhs * z_n * dx)
 
-        return values
+        # for debugging:
+        print(f"laplace: {np.sum(laplace)}")
+        print(f"jump: {np.sum(jump)}")
+        print(f"rhs: {np.sum(rhs)}")
+
+        return -laplace-jump+rhs #values
 
 if __name__ == "__main__":
     # get refinement type from cli
@@ -288,7 +302,7 @@ if __name__ == "__main__":
 
     # hyperparameters
     ERROR_TOL = 1e-14 # stopping criterion for DWR loop
-    MAX_DWR_ITERATIONS = 3#5
+    MAX_DWR_ITERATIONS = 3 #5
     PLOT_ESTIMATOR = False
     temporal_mesh = TemporalMesh(
         t0 = 0.0, # start time 
