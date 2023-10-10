@@ -49,6 +49,28 @@ class TemporalMesh:
         else:
             plt.savefig(savepath, bbox_inches='tight')
 
+    def plot_timestep_sizes(self, title="Timestep sizes", savepath=None):
+        plt.clf()
+        plt.title(title)
+        X = []
+        Y = []
+        for i in range(len(self.mesh)):
+            X.append(self.mesh[i][0])
+            X.append(self.mesh[i][1])
+            X.append(self.mesh[i][1])
+            Δt = self.mesh[i][1] - self.mesh[i][0]
+            Y.append(Δt)
+            Y.append(Δt)
+            Y.append(np.inf)
+        plt.yscale("log")
+        plt.xlabel("t")
+        plt.ylabel(r"$\Delta t$")
+        plt.plot(X, Y, color="black", linewidth=1)
+        if savepath is None:
+            plt.show()
+        else:
+            plt.savefig(savepath, bbox_inches='tight')
+
     def refine(self, refine_flags=None):
         if refine_flags is None:
             refine_flags = [True for i in range(self.n_elements)]
@@ -447,7 +469,7 @@ if __name__ == "__main__":
 
     # if using adaptive refinement
     if refinement_type == "adaptive":
-        temporal_mesh.plot_mesh()
+        temporal_mesh.plot_timestep_sizes(title="", savepath="timestep_sizes.pdf")
 
     # print convergence table as tabulate
     for tablefmt in ["simple", "latex"]:
