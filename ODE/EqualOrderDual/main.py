@@ -89,6 +89,9 @@ def compute_goal_functional(mesh, primal_solutions, goal_functional):
     return J
 
 def solve_dual(mesh, primal_solutions, goal_functional):
+    assert goal_functional == "end_time", "Only end time goal functional is supported for the dual problem!"
+    # TODO: implement dual problem for time integral goal functional
+
     # solve dual problem
     z = []
     if goal_functional == "end_time":
@@ -99,12 +102,10 @@ def solve_dual(mesh, primal_solutions, goal_functional):
         z.append(0.)
     for element in reversed(mesh):
         # dG(0) approximation of ∂_t z + z = 0:
-        #      z_n = (1 + Δt) z_{n+1} 
-        # NOTE: for goal functional J(u) = ∫_0^T u(t) dt, we have to add Δt to z_n since we have a RHS in the dual problem
+        #      -z_n -Δt*z_{n-1} = -z_{n-1}
+        # <=>  z_n = z_{n-1} / (1 - Δt)
         Δt = element[1] - element[0]
         z.append(z[-1] * (1. + Δt))
-        if goal_functional == "time_integral":
-            z[-1] += Δt
     return z[::-1]
 
 def plot_solutions(mesh, primal_solutions, dual_solutions, goal_functional_type):
@@ -292,9 +293,6 @@ if __name__ == "__main__":
         print(f"  J(u):          {J_reference:.8e}")
         print(f"  J(u_k):        {goal_functional:.8e}")
         print(f"  J(u) - J(u_k): {true_error:.8e}")
-        # sanity check for uniform refinement and end time goal functional
-        # k = mesh.mesh[0][1] - mesh.mesh[0][0]
-        # print(f"  J(u) - J(u_k): {np.exp(1.) - np.power((1. / (1. -k)), 1./k):.8e}")
 
         print("Solve dual problem:")
         dual_solutions = solve_dual(mesh.mesh, primal_solutions, goal_functional_type)

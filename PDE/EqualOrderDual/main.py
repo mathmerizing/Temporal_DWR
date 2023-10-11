@@ -331,7 +331,7 @@ class SpatialFE:
 
             # assemble individual terms of residual and apply boundary conditions
             residual_jump = -self.mass_matrix.dot(u - u_n) * (1.0 - self.boundary_dof_vector)
-            residual_laplace = - 0.5 * Δt * self.laplace_matrix.dot(u) * (1.0 - self.boundary_dof_vector)
+            residual_laplace = - Δt * self.laplace_matrix.dot(u) * (1.0 - self.boundary_dof_vector)
             # NOTE: Here the assembly of the RHS term is easy because the RHS is element-wise constant in time
             residual_rhs = np.zeros((self.V.dim(),))
             if temporal_element[1] <= 0.5:
@@ -341,8 +341,8 @@ class SpatialFE:
 
            # multiply residual parts with dual solution
             values[i] += np.dot(residual_jump, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
-            values[i] += np.dot(residual_laplace, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
-            values[i] += np.dot(residual_laplace, z_fine(temporal_element[1]) - z_coarse(temporal_element[1]))
+            values[i] += 0.5 * np.dot(residual_laplace, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
+            values[i] += 0.5 * np.dot(residual_laplace, z_fine(temporal_element[1]) - z_coarse(temporal_element[1]))
             values[i] += 0.5 * np.dot(residual_rhs, z_fine(temporal_element[0]) - z_coarse(temporal_element[0]))
             values[i] += 0.5 * np.dot(residual_rhs, z_fine(temporal_element[1]) - z_coarse(temporal_element[1]))
 
