@@ -181,9 +181,6 @@ class SpatialFE:
         # store initial condition as numpy array
         solutions.append(u_n.copy())
 
-        # for debugging:
-        self.solve_factorized = {}
-
         # for each temporal element:
         #    solve forward in time with backward Euler
         for i, temporal_element in enumerate(tqdm(temporal_mesh)):
@@ -248,9 +245,6 @@ class SpatialFE:
         # store initial condition as numpy array
         solutions.append(z_n.copy())
 
-        # for debugging:
-        self.solve_factorized = {}
-
         # for each temporal element:
         #    solve backward in time with backward Euler
         for i, temporal_element in tqdm(list(enumerate(temporal_mesh))[::-1]):
@@ -262,24 +256,10 @@ class SpatialFE:
                     Δt = dt
                     break
             else:
-                # raise "Factorized matrix for Δt not found! (This should not happen!)"
-                print(f"Factorize matrix for Δt = {Δt}")
-                # store system matrix with enforced homogeneous Dirichlet BC
-                self.system_matrix[Δt] = (
-                    (
-                        self.mass_matrix
-                    ).multiply((1.0 - self.boundary_dof_vector).reshape(-1, 1)) + scipy.sparse.diags(self.boundary_dof_vector)
-                ).tocsc()
-
-                # factorize system matrix
-                self.solve_factorized[Δt] = scipy.sparse.linalg.factorized(
-                    self.system_matrix[Δt]
-                )
+                raise "Factorized matrix for Δt not found! (This should not happen!)"
 
             rhs_vector = self.mass_matrix.dot(z_n) + Δt * self.goal_functional_vector
-            # for forward Euler:
-            rhs_vector -= Δt * self.laplace_matrix.dot(z_n)
-
+            
             # apply homogeneous Dirichlet BC to right hand side
             rhs_vector = rhs_vector * (1.0 - self.boundary_dof_vector)
 
@@ -288,12 +268,12 @@ class SpatialFE:
             # store solution as numpy array
             solutions.append(z.copy())
 
-            Z = Function(self.V)
-            Z.vector()[:] = z
-            c = plot(Z)
-            plt.colorbar(c)
-            plot(self.mesh)
-            plt.show()
+            # Z = Function(self.V)
+            # Z.vector()[:] = z
+            # c = plot(Z)
+            # plt.colorbar(c)
+            # plot(self.mesh)
+            # plt.show()
 
             z_n = z.copy()
         
