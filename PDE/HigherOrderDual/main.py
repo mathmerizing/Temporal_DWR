@@ -297,7 +297,7 @@ class SpatialFE:
 
             # create RHS vector for dual problem
             rhs_vector = 0.5 * Δt * self.space_time_goal_functional_vector
-            rhs_vector[self.V.dim():] = self.mass_matrix.dot(z_n[self.V.dim():])
+            rhs_vector[self.V.dim():] += self.mass_matrix.dot(z_n[:self.V.dim()])
              
             # apply homogeneous Dirichlet BC to right hand side
             rhs_vector = rhs_vector * (1.0 - dofs_at_boundary)
@@ -306,6 +306,21 @@ class SpatialFE:
 
             # store solution as numpy array
             solutions.append(z.copy())
+
+            # # plot Z0
+            # Z = Function(self.V)
+            # Z.vector()[:] = z[:self.V.dim()]
+            # c = plot(Z)
+            # plt.colorbar(c)
+            # plt.title("Z0")
+            # plt.show()
+
+            # # plot Z1
+            # Z.vector()[:] = z[self.V.dim():]
+            # c = plot(Z)
+            # plt.colorbar(c)
+            # plt.title("Z1")
+            # plt.show()
 
             z_n = z.copy()
         
@@ -415,8 +430,7 @@ if __name__ == "__main__":
 
         print("Compute goal functional:")
         goal_functional = spatial_fe.compute_goal_functional(temporal_mesh.mesh, primal_solutions)
-        #J_reference = 3.058290061946076e-05 # reference from uniform refinement with 262,144 temporal elements
-        J_reference = 4.26326261e-03 # reference from uniform refinement with 131,072 temporal elements
+        J_reference = 4.2632626178e-03 # reference from uniform refinement with 524,288 temporal elements
         true_error = J_reference - goal_functional
         print(f"  n_k:           {temporal_mesh.n_elements}")
         print(f"  J(u_k):        {goal_functional:.8e}")
