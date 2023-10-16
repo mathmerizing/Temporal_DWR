@@ -396,8 +396,7 @@ if __name__ == "__main__":
 
         print("Compute goal functional:")
         goal_functional = spatial_fe.compute_goal_functional(temporal_mesh.mesh, primal_solutions)
-        #J_reference = 3.058290061946076e-05 # reference from uniform refinement with 262,144 temporal elements
-        J_reference = 4.26326261e-03 # reference from uniform refinement with 131,072 temporal elements
+        J_reference = 4.2632626178e-03 # reference from uniform refinement with 524,288 temporal elements
         true_error = J_reference - goal_functional
         print(f"  n_k:           {temporal_mesh.n_elements}")
         print(f"  J(u_k):        {goal_functional:.8e}")
@@ -478,6 +477,21 @@ if __name__ == "__main__":
     for tablefmt in ["simple", "latex"]:
         table = tabulate([[row[0], *row[1].values()] for row in convergence_table.items()], headers=["#DoFs", "$J(u_k)$", "$J(u) - J(u_k)$", "$\eta_k$", "$I_{eff}$"], tablefmt=tablefmt)
         print(table)
+
+    # convert python scientific to latex scientific notation
+    def science_format(num):
+        num = num.split("e")
+        return fr"${num[0]} \cdot 10^{{{int(num[1])}}}$"
+    
+    print("\nConvergence table:")
+    print("==================\n")
+    print("DoFs (n_k) | J(u_k) | J(u) - J(u_k) | η_k | effectivity index")
+    print("-------------------------------------------------------------")
+    for key, value in convergence_table.items():
+        _qoi_value = science_format(f"{value['J(u_k)']:.8e}")
+        _true_error = science_format(f"{value['J(u) - J(u_k)']:.4e}")
+        _est_error = science_format(f"{value['η_k']:.4e}")
+        print(f"    {key:,} & {_qoi_value} & {_true_error} & {_est_error} & {value['effectivity index']:.6f} \\\\")
     
     # plot convergence table
     plt.clf()
