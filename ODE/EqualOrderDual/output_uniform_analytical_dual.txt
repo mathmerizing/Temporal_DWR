@@ -1,0 +1,321 @@
+Refinement type: uniform
+Goal functional: end_time
+Analytical dual: True
+
+DWR ITERATION 1:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    10
+  J(u):          2.71828183e+00
+  J(u_k):        2.86797199e+00
+  J(u) - J(u_k): -1.49690162e-01
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.14969016233339588
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 2:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    20
+  J(u):          2.71828183e+00
+  J(u_k):        2.78950982e+00
+  J(u) - J(u_k): -7.12279891e-02
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.07122798905721314
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 3:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    40
+  J(u):          2.71828183e+00
+  J(u_k):        2.75305807e+00
+  J(u) - J(u_k): -3.47762418e-02
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.034776241763622845
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 4:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    80
+  J(u):          2.71828183e+00
+  J(u_k):        2.73546811e+00
+  J(u) - J(u_k): -1.71862813e-02
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.017186281341872736
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 5:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    160
+  J(u):          2.71828183e+00
+  J(u_k):        2.72682542e+00
+  J(u) - J(u_k): -8.54358999e-03
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.008543589985830099
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 6:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    320
+  J(u):          2.71828183e+00
+  J(u_k):        2.72254135e+00
+  J(u) - J(u_k): -4.25951855e-03
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.004259518549217278
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 7:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    640
+  J(u):          2.71828183e+00
+  J(u_k):        2.72040853e+00
+  J(u) - J(u_k): -2.12670392e-03
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0021267039191947426
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 8:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    1280
+  J(u):          2.71828183e+00
+  J(u_k):        2.71934442e+00
+  J(u) - J(u_k): -1.06258983e-03
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0010625898309692453
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 9:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    2560
+  J(u):          2.71828183e+00
+  J(u_k):        2.71881293e+00
+  J(u) - J(u_k): -5.31104597e-04
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0005311045965960665
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 10:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    5120
+  J(u):          2.71828183e+00
+  J(u_k):        2.71854733e+00
+  J(u) - J(u_k): -2.65504745e-04
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.00026550474549552063
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 11:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    10240
+  J(u):          2.71828183e+00
+  J(u_k):        2.71841457e+00
+  J(u) - J(u_k): -1.32740488e-04
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0001327404876364989
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 12:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    20480
+  J(u):          2.71828183e+00
+  J(u_k):        2.71834820e+00
+  J(u) - J(u_k): -6.63672717e-05
+Solve dual problem:
+Compute error estimator:
+  η_k: -6.636727173752857e-05
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 13:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    40960
+  J(u):          2.71828183e+00
+  J(u_k):        2.71831501e+00
+  J(u) - J(u_k): -3.31828938e-05
+Solve dual problem:
+Compute error estimator:
+  η_k: -3.318289384307419e-05
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 14:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    81920
+  J(u):          2.71828183e+00
+  J(u_k):        2.71829842e+00
+  J(u) - J(u_k): -1.65912663e-05
+Solve dual problem:
+Compute error estimator:
+  η_k: -1.659126625036334e-05
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 15:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    163840
+  J(u):          2.71828183e+00
+  J(u_k):        2.71829012e+00
+  J(u) - J(u_k): -8.29558415e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -8.29558415443602e-06
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 16:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    327680
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828598e+00
+  J(u) - J(u_k): -4.14776072e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -4.147760717272802e-06
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 17:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    655360
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828390e+00
+  J(u) - J(u_k): -2.07388729e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -2.073887293171365e-06
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 18:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    1310720
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828287e+00
+  J(u) - J(u_k): -1.03702200e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -1.0370219991020813e-06
+  effectivity index: 1.00000000e+00
+
+DWR ITERATION 19:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    2621440
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828235e+00
+  J(u) - J(u_k): -5.18471017e-07
+Solve dual problem:
+Compute error estimator:
+  η_k: -5.184710173914736e-07
+  effectivity index: 1.00000000e+00
+  #DoFs    $J(u_k)$    $J(u) - J(u_k)$      $\eta_k$    $I_{eff}$
+-------  ----------  -----------------  ------------  -----------
+     10     2.86797       -0.14969      -0.14969                1
+     20     2.78951       -0.071228     -0.071228               1
+     40     2.75306       -0.0347762    -0.0347762              1
+     80     2.73547       -0.0171863    -0.0171863              1
+    160     2.72683       -0.00854359   -0.00854359             1
+    320     2.72254       -0.00425952   -0.00425952             1
+    640     2.72041       -0.0021267    -0.0021267              1
+   1280     2.71934       -0.00106259   -0.00106259             1
+   2560     2.71881       -0.000531105  -0.000531105            1
+   5120     2.71855       -0.000265505  -0.000265505            1
+  10240     2.71841       -0.00013274   -0.00013274             1
+  20480     2.71835       -6.63673e-05  -6.63673e-05            1
+  40960     2.71832       -3.31829e-05  -3.31829e-05            1
+  81920     2.7183        -1.65913e-05  -1.65913e-05            1
+ 163840     2.71829       -8.29558e-06  -8.29558e-06            1
+ 327680     2.71829       -4.14776e-06  -4.14776e-06            1
+ 655360     2.71828       -2.07389e-06  -2.07389e-06            1
+1310720     2.71828       -1.03702e-06  -1.03702e-06            1
+2621440     2.71828       -5.18471e-07  -5.18471e-07            1
+\begin{tabular}{rrrrr}
+\hline
+   \#DoFs &   \$J(u\_k)\$ &   \$J(u) - J(u\_k)\$ &     \$\textbackslash{}eta\_k\$ &   \$I\_\{eff\}\$ \\
+\hline
+      10 &    2.86797 &      -0.14969     & -0.14969     &           1 \\
+      20 &    2.78951 &      -0.071228    & -0.071228    &           1 \\
+      40 &    2.75306 &      -0.0347762   & -0.0347762   &           1 \\
+      80 &    2.73547 &      -0.0171863   & -0.0171863   &           1 \\
+     160 &    2.72683 &      -0.00854359  & -0.00854359  &           1 \\
+     320 &    2.72254 &      -0.00425952  & -0.00425952  &           1 \\
+     640 &    2.72041 &      -0.0021267   & -0.0021267   &           1 \\
+    1280 &    2.71934 &      -0.00106259  & -0.00106259  &           1 \\
+    2560 &    2.71881 &      -0.000531105 & -0.000531105 &           1 \\
+    5120 &    2.71855 &      -0.000265505 & -0.000265505 &           1 \\
+   10240 &    2.71841 &      -0.00013274  & -0.00013274  &           1 \\
+   20480 &    2.71835 &      -6.63673e-05 & -6.63673e-05 &           1 \\
+   40960 &    2.71832 &      -3.31829e-05 & -3.31829e-05 &           1 \\
+   81920 &    2.7183  &      -1.65913e-05 & -1.65913e-05 &           1 \\
+  163840 &    2.71829 &      -8.29558e-06 & -8.29558e-06 &           1 \\
+  327680 &    2.71829 &      -4.14776e-06 & -4.14776e-06 &           1 \\
+  655360 &    2.71828 &      -2.07389e-06 & -2.07389e-06 &           1 \\
+ 1310720 &    2.71828 &      -1.03702e-06 & -1.03702e-06 &           1 \\
+ 2621440 &    2.71828 &      -5.18471e-07 & -5.18471e-07 &           1 \\
+\hline
+\end{tabular}
+
+Convergence plot:
+(10,0.14969016233339572)(20,0.07122798905721295)(40,0.03477624176362282)(80,0.01718628134187261)(160,0.008543589985829936)(320,0.004259518549217134)(640,0.0021267039191945614)(1280,0.001062589830969074)(2560,0.0005311045965958883)(5120,0.00026550474549535963)(10240,0.00013274048763634028)(20480,6.636727173736645e-05)(40960,3.318289384290907e-05)(81920,1.65912662501988e-05)(163840,8.295584154272007e-06)(327680,4.147760717110316e-06)(655360,2.0738872930081698e-06)(1310720,1.0370219989397356e-06)(2621440,5.184710172301266e-07)
+
+Effectivity index:
+(10,0.9999999999999989)(20,0.9999999999999972)(40,0.9999999999999992)(80,0.9999999999999928)(160,0.9999999999999809)(320,0.9999999999999662)(640,0.9999999999999147)(1280,0.9999999999998388)(2560,0.9999999999996644)(5120,0.9999999999993936)(10240,0.9999999999988051)(20480,0.9999999999975573)(40960,0.9999999999950239)(81920,0.9999999999900827)(163840,0.9999999999802289)(327680,0.9999999999608256)(655360,0.9999999999213095)(1310720,0.9999999998434501)(2621440,0.9999999996888022)

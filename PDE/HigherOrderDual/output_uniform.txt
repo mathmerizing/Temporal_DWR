@@ -1,0 +1,202 @@
+Refinement type: uniform
+
+DWR ITERATION 1:
+================
+
+Solve primal problem:
+Factorize matrix for Δt = 0.125
+Compute goal functional:
+  n_k:           16
+  J(u_k):        4.26188846e-03
+  J(u) - J(u_k): 1.37415589e-06
+Solve dual problem:
+Factorize dual matrix for Δt = 0.125
+Compute error estimator:
+  η_k: 1.3858109169009726e-06
+  effectivity index: 9.91589742e-01
+
+DWR ITERATION 2:
+================
+
+Solve primal problem:
+Factorize matrix for Δt = 0.0625
+Compute goal functional:
+  n_k:           32
+  J(u_k):        4.26294642e-03
+  J(u) - J(u_k): 3.16194152e-07
+Solve dual problem:
+Factorize dual matrix for Δt = 0.0625
+Compute error estimator:
+  η_k: 3.1820236737737196e-07
+  effectivity index: 9.93688873e-01
+
+DWR ITERATION 3:
+================
+
+Solve primal problem:
+Factorize matrix for Δt = 0.03125
+Compute goal functional:
+  n_k:           64
+  J(u_k):        4.26318020e-03
+  J(u) - J(u_k): 8.24152723e-08
+Solve dual problem:
+Factorize dual matrix for Δt = 0.03125
+Compute error estimator:
+  η_k: 8.271026749578774e-08
+  effectivity index: 9.96433391e-01
+
+DWR ITERATION 4:
+================
+
+Solve primal problem:
+Factorize matrix for Δt = 0.015625
+Compute goal functional:
+  n_k:           128
+  J(u_k):        4.26323590e-03
+  J(u) - J(u_k): 2.67180910e-08
+Solve dual problem:
+Factorize dual matrix for Δt = 0.015625
+Compute error estimator:
+  η_k: 2.67610169885914e-08
+  effectivity index: 9.98395951e-01
+
+DWR ITERATION 5:
+================
+
+Solve primal problem:
+Factorize matrix for Δt = 0.0078125
+Compute goal functional:
+  n_k:           256
+  J(u_k):        4.26325220e-03
+  J(u) - J(u_k): 1.04175534e-08
+Solve dual problem:
+Factorize dual matrix for Δt = 0.0078125
+Compute error estimator:
+  η_k: 1.042649130951153e-08
+  effectivity index: 9.99142767e-01
+
+DWR ITERATION 6:
+================
+
+Solve primal problem:
+Factorize matrix for Δt = 0.00390625
+Compute goal functional:
+  n_k:           512
+  J(u_k):        4.26325806e-03
+  J(u) - J(u_k): 4.56194746e-09
+Solve dual problem:
+Factorize dual matrix for Δt = 0.00390625
+Compute error estimator:
+  η_k: 4.566464820917199e-09
+  effectivity index: 9.99010753e-01
+
+DWR ITERATION 7:
+================
+
+Solve primal problem:
+Factorize matrix for Δt = 0.001953125
+Compute goal functional:
+  n_k:           1024
+  J(u_k):        4.26326049e-03
+  J(u) - J(u_k): 2.12917755e-09
+Solve dual problem:
+Factorize dual matrix for Δt = 0.001953125
+Compute error estimator:
+  η_k: 2.13313051221331e-09
+  effectivity index: 9.98146872e-01
+
+DWR ITERATION 8:
+================
+
+Solve primal problem:
+Factorize matrix for Δt = 0.0009765625
+Compute goal functional:
+  n_k:           2048
+  J(u_k):        4.26326159e-03
+  J(u) - J(u_k): 1.02660812e-09
+Solve dual problem:
+Factorize dual matrix for Δt = 0.0009765625
+Compute error estimator:
+  η_k: 1.0304899079506688e-09
+  effectivity index: 9.96233066e-01
+
+DWR ITERATION 9:
+================
+
+Solve primal problem:
+Factorize matrix for Δt = 0.00048828125
+Compute goal functional:
+  n_k:           4096
+  J(u_k):        4.26326212e-03
+  J(u) - J(u_k): 5.02534489e-10
+Solve dual problem:
+Factorize dual matrix for Δt = 0.00048828125
+Compute error estimator:
+  η_k: 5.064071996664774e-10
+  effectivity index: 9.92352576e-01
+
+DWR ITERATION 10:
+================
+
+Solve primal problem:
+Factorize matrix for Δt = 0.000244140625
+Compute goal functional:
+  n_k:           8192
+  J(u_k):        4.26326237e-03
+  J(u) - J(u_k): 2.47145214e-10
+Solve dual problem:
+Factorize dual matrix for Δt = 0.000244140625
+Compute error estimator:
+  η_k: 2.510167771872283e-10
+  effectivity index: 9.84576476e-01
+
+DWR ITERATION 11:
+================
+
+Solve primal problem:
+Factorize matrix for Δt = 0.0001220703125
+Compute goal functional:
+  n_k:           16384
+  J(u_k):        4.26326250e-03
+  J(u) - J(u_k): 1.21092968e-10
+Solve dual problem:
+Factorize dual matrix for Δt = 0.0001220703125
+Compute error estimator:
+  η_k: 1.2496450845180023e-10
+  effectivity index: 9.69018881e-01
+  #DoFs    $J(u_k)$    $J(u) - J(u_k)$     $\eta_k$    $I_{eff}$
+-------  ----------  -----------------  -----------  -----------
+     16  0.00426189        1.37416e-06  1.38581e-06     0.99159
+     32  0.00426295        3.16194e-07  3.18202e-07     0.993689
+     64  0.00426318        8.24153e-08  8.27103e-08     0.996433
+    128  0.00426324        2.67181e-08  2.6761e-08      0.998396
+    256  0.00426325        1.04176e-08  1.04265e-08     0.999143
+    512  0.00426326        4.56195e-09  4.56646e-09     0.999011
+   1024  0.00426326        2.12918e-09  2.13313e-09     0.998147
+   2048  0.00426326        1.02661e-09  1.03049e-09     0.996233
+   4096  0.00426326        5.02534e-10  5.06407e-10     0.992353
+   8192  0.00426326        2.47145e-10  2.51017e-10     0.984576
+  16384  0.00426326        1.21093e-10  1.24965e-10     0.969019
+\begin{tabular}{rrrrr}
+\hline
+   \#DoFs &   \$J(u\_k)\$ &   \$J(u) - J(u\_k)\$ &    \$\textbackslash{}eta\_k\$ &   \$I\_\{eff\}\$ \\
+\hline
+      16 & 0.00426189 &       1.37416e-06 & 1.38581e-06 &    0.99159  \\
+      32 & 0.00426295 &       3.16194e-07 & 3.18202e-07 &    0.993689 \\
+      64 & 0.00426318 &       8.24153e-08 & 8.27103e-08 &    0.996433 \\
+     128 & 0.00426324 &       2.67181e-08 & 2.6761e-08  &    0.998396 \\
+     256 & 0.00426325 &       1.04176e-08 & 1.04265e-08 &    0.999143 \\
+     512 & 0.00426326 &       4.56195e-09 & 4.56646e-09 &    0.999011 \\
+    1024 & 0.00426326 &       2.12918e-09 & 2.13313e-09 &    0.998147 \\
+    2048 & 0.00426326 &       1.02661e-09 & 1.03049e-09 &    0.996233 \\
+    4096 & 0.00426326 &       5.02534e-10 & 5.06407e-10 &    0.992353 \\
+    8192 & 0.00426326 &       2.47145e-10 & 2.51017e-10 &    0.984576 \\
+   16384 & 0.00426326 &       1.21093e-10 & 1.24965e-10 &    0.969019 \\
+\hline
+\end{tabular}
+
+Convergence plot:
+(16,1.3741558896095477e-06)(32,3.16194151727886e-07)(64,8.24152723245472e-08)(128,2.6718091012192802e-08)(256,1.0417553377231603e-08)(512,4.561947460415827e-09)(1024,2.1291775486806386e-09)(2048,1.0266081205620448e-09)(4096,5.025344888484606e-10)(8192,2.4714521401625333e-10)(16384,1.2109296811807502e-10)
+
+Effectivity index:
+(16,0.991589742042523)(32,0.9936888726943244)(64,0.9964333911596217)(128,0.9983959512294732)(256,0.9991427670138877)(512,0.9990107532459946)(1024,0.9981468721627492)(2048,0.9962330660798574)(4096,0.9923525755151835)(8192,0.9845764764636139)(16384,0.9690188807871117)

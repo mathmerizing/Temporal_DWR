@@ -1,0 +1,791 @@
+Refinement type: adaptive
+Goal functional: end_time
+Analytical dual: False
+
+DWR ITERATION 1:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    10
+  J(u):          2.71828183e+00
+  J(u_k):        2.86797199e+00
+  J(u) - J(u_k): -1.49690162e-01
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.17703530807360734
+  effectivity index: 8.45538463e-01
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 2:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    15
+  J(u):          2.71828183e+00
+  J(u_k):        2.82846885e+00
+  J(u) - J(u_k): -1.10187020e-01
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.12115376465395722
+  effectivity index: 9.09480774e-01
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 3:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    19
+  J(u):          2.71828183e+00
+  J(u_k):        2.80318442e+00
+  J(u) - J(u_k): -8.49025895e-02
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.08408057421812684
+  effectivity index: 1.00977652e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 4:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    26
+  J(u):          2.71828183e+00
+  J(u_k):        2.77852390e+00
+  J(u) - J(u_k): -6.02420765e-02
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.05881606419991272
+  effectivity index: 1.02424529e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 5:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    34
+  J(u):          2.71828183e+00
+  J(u_k):        2.76394329e+00
+  J(u) - J(u_k): -4.56614658e-02
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.043375930631370956
+  effectivity index: 1.05269132e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 6:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    45
+  J(u):          2.71828183e+00
+  J(u_k):        2.75085315e+00
+  J(u) - J(u_k): -3.25713259e-02
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.032694878653857236
+  effectivity index: 9.96221037e-01
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 7:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    64
+  J(u):          2.71828183e+00
+  J(u_k):        2.74249057e+00
+  J(u) - J(u_k): -2.42087388e-02
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.022434396526449886
+  effectivity index: 1.07909026e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 8:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    84
+  J(u):          2.71828183e+00
+  J(u_k):        2.73635598e+00
+  J(u) - J(u_k): -1.80741528e-02
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.017014796055159157
+  effectivity index: 1.06226091e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 9:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    116
+  J(u):          2.71828183e+00
+  J(u_k):        2.73165672e+00
+  J(u) - J(u_k): -1.33748942e-02
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.01278541892330154
+  effectivity index: 1.04610528e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 10:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    146
+  J(u):          2.71828183e+00
+  J(u_k):        2.72841703e+00
+  J(u) - J(u_k): -1.01351997e-02
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.009423083581599717
+  effectivity index: 1.07557146e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 11:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    203
+  J(u):          2.71828183e+00
+  J(u_k):        2.72567341e+00
+  J(u) - J(u_k): -7.39158382e-03
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.007052094755263036
+  effectivity index: 1.04814017e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 12:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    269
+  J(u):          2.71828183e+00
+  J(u_k):        2.72390616e+00
+  J(u) - J(u_k): -5.62433504e-03
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.005068860055987796
+  effectivity index: 1.10958578e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 13:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    357
+  J(u):          2.71828183e+00
+  J(u_k):        2.72239508e+00
+  J(u) - J(u_k): -4.11325286e-03
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0038985379100450112
+  effectivity index: 1.05507576e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 14:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    497
+  J(u):          2.71828183e+00
+  J(u_k):        2.72138143e+00
+  J(u) - J(u_k): -3.09960368e-03
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0028168762313346943
+  effectivity index: 1.10036914e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 15:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    646
+  J(u):          2.71828183e+00
+  J(u_k):        2.72059854e+00
+  J(u) - J(u_k): -2.31670977e-03
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0021310370030417055
+  effectivity index: 1.08712789e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 16:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    898
+  J(u):          2.71828183e+00
+  J(u_k):        2.71999448e+00
+  J(u) - J(u_k): -1.71265145e-03
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0015837528834196026
+  effectivity index: 1.08138806e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 17:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    1136
+  J(u):          2.71828183e+00
+  J(u_k):        2.71959877e+00
+  J(u) - J(u_k): -1.31694564e-03
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0011907687815773315
+  effectivity index: 1.10596252e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 18:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    1535
+  J(u):          2.71828183e+00
+  J(u_k):        2.71923853e+00
+  J(u) - J(u_k): -9.56699720e-04
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0009112300936235274
+  effectivity index: 1.04989917e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 19:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    2084
+  J(u):          2.71828183e+00
+  J(u_k):        2.71901057e+00
+  J(u) - J(u_k): -7.28738535e-04
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.000659973161357673
+  effectivity index: 1.10419420e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 20:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    2737
+  J(u):          2.71828183e+00
+  J(u_k):        2.71881450e+00
+  J(u) - J(u_k): -5.32671304e-04
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0005033592063847679
+  effectivity index: 1.05823296e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 21:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    3859
+  J(u):          2.71828183e+00
+  J(u_k):        2.71868104e+00
+  J(u) - J(u_k): -3.99209427e-04
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.000364590982724348
+  effectivity index: 1.09495146e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 22:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    4962
+  J(u):          2.71828183e+00
+  J(u_k):        2.71858660e+00
+  J(u) - J(u_k): -3.04773953e-04
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.0002757730446304261
+  effectivity index: 1.10516223e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 23:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    6787
+  J(u):          2.71828183e+00
+  J(u_k):        2.71850549e+00
+  J(u) - J(u_k): -2.23658715e-04
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.00020829585298416577
+  effectivity index: 1.07375501e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 24:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    8795
+  J(u):          2.71828183e+00
+  J(u_k):        2.71845342e+00
+  J(u) - J(u_k): -1.71590262e-04
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.00015453035142175273
+  effectivity index: 1.11039844e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 25:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    11555
+  J(u):          2.71828183e+00
+  J(u_k):        2.71840616e+00
+  J(u) - J(u_k): -1.24333571e-04
+Solve dual problem:
+Compute error estimator:
+  η_k: -0.00011995328815477089
+  effectivity index: 1.03651657e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 26:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    16176
+  J(u):          2.71828183e+00
+  J(u_k):        2.71837612e+00
+  J(u) - J(u_k): -9.42937349e-05
+Solve dual problem:
+Compute error estimator:
+  η_k: -8.56033260161569e-05
+  effectivity index: 1.10151952e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 27:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    21148
+  J(u):          2.71828183e+00
+  J(u_k):        2.71835135e+00
+  J(u) - J(u_k): -6.95239738e-05
+Solve dual problem:
+Compute error estimator:
+  η_k: -6.509429365748881e-05
+  effectivity index: 1.06805021e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 28:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    29669
+  J(u):          2.71828183e+00
+  J(u_k):        2.71833358e+00
+  J(u) - J(u_k): -5.17465726e-05
+Solve dual problem:
+Compute error estimator:
+  η_k: -4.7748371528387805e-05
+  effectivity index: 1.08373482e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 29:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    37664
+  J(u):          2.71828183e+00
+  J(u_k):        2.71832162e+00
+  J(u) - J(u_k): -3.97897714e-05
+Solve dual problem:
+Compute error estimator:
+  η_k: -3.594520647129421e-05
+  effectivity index: 1.10695626e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 30:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    51470
+  J(u):          2.71828183e+00
+  J(u_k):        2.71831084e+00
+  J(u) - J(u_k): -2.90161417e-05
+Solve dual problem:
+Compute error estimator:
+  η_k: -2.7336761557244398e-05
+  effectivity index: 1.06143303e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 31:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    68342
+  J(u):          2.71828183e+00
+  J(u_k):        2.71830401e+00
+  J(u) - J(u_k): -2.21818151e-05
+Solve dual problem:
+Compute error estimator:
+  η_k: -1.9957599713395876e-05
+  effectivity index: 1.11144704e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 32:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    89980
+  J(u):          2.71828183e+00
+  J(u_k):        2.71829810e+00
+  J(u) - J(u_k): -1.62672232e-05
+Solve dual problem:
+Compute error estimator:
+  η_k: -1.5333534967248726e-05
+  effectivity index: 1.06089191e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 33:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    125738
+  J(u):          2.71828183e+00
+  J(u_k):        2.71829407e+00
+  J(u) - J(u_k): -1.22408139e-05
+Solve dual problem:
+Compute error estimator:
+  η_k: -1.116350015976898e-05
+  effectivity index: 1.09650323e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 34:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    162036
+  J(u):          2.71828183e+00
+  J(u_k):        2.71829108e+00
+  J(u) - J(u_k): -9.25446766e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -8.445349089911752e-06
+  effectivity index: 1.09580641e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 35:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    224192
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828865e+00
+  J(u) - J(u_k): -6.82097054e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -6.304979561823787e-06
+  effectivity index: 1.08183864e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 36:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    286454
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828707e+00
+  J(u) - J(u_k): -5.24472771e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -4.719322109704473e-06
+  effectivity index: 1.11133073e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 37:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    381604
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828564e+00
+  J(u) - J(u_k): -3.80668169e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -3.6435329733163634e-06
+  effectivity index: 1.04477761e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 38:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    525526
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828472e+00
+  J(u) - J(u_k): -2.89580308e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -2.6238572559964136e-06
+  effectivity index: 1.10364353e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 39:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    688860
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828396e+00
+  J(u) - J(u_k): -2.12959299e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -1.9977932738809136e-06
+  effectivity index: 1.06597265e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 40:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    968011
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828342e+00
+  J(u) - J(u_k): -1.59025512e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -1.4526395897392067e-06
+  effectivity index: 1.09473480e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 41:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    1241993
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828305e+00
+  J(u) - J(u_k): -1.22522145e-06
+Solve dual problem:
+Compute error estimator:
+  η_k: -1.0962336923872296e-06
+  effectivity index: 1.11766447e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 42:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    1684477
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828272e+00
+  J(u) - J(u_k): -8.95393858e-07
+Solve dual problem:
+Compute error estimator:
+  η_k: -8.375069735738847e-07
+  effectivity index: 1.06911809e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+
+DWR ITERATION 43:
+================
+
+Solve primal problem:
+Compute goal functional:
+  DoFs (n_k):    2213791
+  J(u):          2.71828183e+00
+  J(u_k):        2.71828251e+00
+  J(u) - J(u_k): -6.85983110e-07
+Solve dual problem:
+Compute error estimator:
+  η_k: -6.173309639414202e-07
+  effectivity index: 1.11120801e+00
+Mark temporal elements for refinement
+Refine temporal mesh
+  #DoFs    $J(u_k)$    $J(u) - J(u_k)$      $\eta_k$    $I_{eff}$
+-------  ----------  -----------------  ------------  -----------
+     10     2.86797       -0.14969      -0.177035        0.845538
+     15     2.82847       -0.110187     -0.121154        0.909481
+     19     2.80318       -0.0849026    -0.0840806       1.00978
+     26     2.77852       -0.0602421    -0.0588161       1.02425
+     34     2.76394       -0.0456615    -0.0433759       1.05269
+     45     2.75085       -0.0325713    -0.0326949       0.996221
+     64     2.74249       -0.0242087    -0.0224344       1.07909
+     84     2.73636       -0.0180742    -0.0170148       1.06226
+    116     2.73166       -0.0133749    -0.0127854       1.04611
+    146     2.72842       -0.0101352    -0.00942308      1.07557
+    203     2.72567       -0.00739158   -0.00705209      1.04814
+    269     2.72391       -0.00562434   -0.00506886      1.10959
+    357     2.7224        -0.00411325   -0.00389854      1.05508
+    497     2.72138       -0.0030996    -0.00281688      1.10037
+    646     2.7206        -0.00231671   -0.00213104      1.08713
+    898     2.71999       -0.00171265   -0.00158375      1.08139
+   1136     2.7196        -0.00131695   -0.00119077      1.10596
+   1535     2.71924       -0.0009567    -0.00091123      1.0499
+   2084     2.71901       -0.000728739  -0.000659973     1.10419
+   2737     2.71881       -0.000532671  -0.000503359     1.05823
+   3859     2.71868       -0.000399209  -0.000364591     1.09495
+   4962     2.71859       -0.000304774  -0.000275773     1.10516
+   6787     2.71851       -0.000223659  -0.000208296     1.07376
+   8795     2.71845       -0.00017159   -0.00015453      1.1104
+  11555     2.71841       -0.000124334  -0.000119953     1.03652
+  16176     2.71838       -9.42937e-05  -8.56033e-05     1.10152
+  21148     2.71835       -6.9524e-05   -6.50943e-05     1.06805
+  29669     2.71833       -5.17466e-05  -4.77484e-05     1.08373
+  37664     2.71832       -3.97898e-05  -3.59452e-05     1.10696
+  51470     2.71831       -2.90161e-05  -2.73368e-05     1.06143
+  68342     2.7183        -2.21818e-05  -1.99576e-05     1.11145
+  89980     2.7183        -1.62672e-05  -1.53335e-05     1.06089
+ 125738     2.71829       -1.22408e-05  -1.11635e-05     1.0965
+ 162036     2.71829       -9.25447e-06  -8.44535e-06     1.09581
+ 224192     2.71829       -6.82097e-06  -6.30498e-06     1.08184
+ 286454     2.71829       -5.24473e-06  -4.71932e-06     1.11133
+ 381604     2.71829       -3.80668e-06  -3.64353e-06     1.04478
+ 525526     2.71828       -2.8958e-06   -2.62386e-06     1.10364
+ 688860     2.71828       -2.12959e-06  -1.99779e-06     1.06597
+ 968011     2.71828       -1.59026e-06  -1.45264e-06     1.09473
+1241993     2.71828       -1.22522e-06  -1.09623e-06     1.11766
+1684477     2.71828       -8.95394e-07  -8.37507e-07     1.06912
+2213791     2.71828       -6.85983e-07  -6.17331e-07     1.11121
+\begin{tabular}{rrrrr}
+\hline
+   \#DoFs &   \$J(u\_k)\$ &   \$J(u) - J(u\_k)\$ &     \$\textbackslash{}eta\_k\$ &   \$I\_\{eff\}\$ \\
+\hline
+      10 &    2.86797 &      -0.14969     & -0.177035    &    0.845538 \\
+      15 &    2.82847 &      -0.110187    & -0.121154    &    0.909481 \\
+      19 &    2.80318 &      -0.0849026   & -0.0840806   &    1.00978  \\
+      26 &    2.77852 &      -0.0602421   & -0.0588161   &    1.02425  \\
+      34 &    2.76394 &      -0.0456615   & -0.0433759   &    1.05269  \\
+      45 &    2.75085 &      -0.0325713   & -0.0326949   &    0.996221 \\
+      64 &    2.74249 &      -0.0242087   & -0.0224344   &    1.07909  \\
+      84 &    2.73636 &      -0.0180742   & -0.0170148   &    1.06226  \\
+     116 &    2.73166 &      -0.0133749   & -0.0127854   &    1.04611  \\
+     146 &    2.72842 &      -0.0101352   & -0.00942308  &    1.07557  \\
+     203 &    2.72567 &      -0.00739158  & -0.00705209  &    1.04814  \\
+     269 &    2.72391 &      -0.00562434  & -0.00506886  &    1.10959  \\
+     357 &    2.7224  &      -0.00411325  & -0.00389854  &    1.05508  \\
+     497 &    2.72138 &      -0.0030996   & -0.00281688  &    1.10037  \\
+     646 &    2.7206  &      -0.00231671  & -0.00213104  &    1.08713  \\
+     898 &    2.71999 &      -0.00171265  & -0.00158375  &    1.08139  \\
+    1136 &    2.7196  &      -0.00131695  & -0.00119077  &    1.10596  \\
+    1535 &    2.71924 &      -0.0009567   & -0.00091123  &    1.0499   \\
+    2084 &    2.71901 &      -0.000728739 & -0.000659973 &    1.10419  \\
+    2737 &    2.71881 &      -0.000532671 & -0.000503359 &    1.05823  \\
+    3859 &    2.71868 &      -0.000399209 & -0.000364591 &    1.09495  \\
+    4962 &    2.71859 &      -0.000304774 & -0.000275773 &    1.10516  \\
+    6787 &    2.71851 &      -0.000223659 & -0.000208296 &    1.07376  \\
+    8795 &    2.71845 &      -0.00017159  & -0.00015453  &    1.1104   \\
+   11555 &    2.71841 &      -0.000124334 & -0.000119953 &    1.03652  \\
+   16176 &    2.71838 &      -9.42937e-05 & -8.56033e-05 &    1.10152  \\
+   21148 &    2.71835 &      -6.9524e-05  & -6.50943e-05 &    1.06805  \\
+   29669 &    2.71833 &      -5.17466e-05 & -4.77484e-05 &    1.08373  \\
+   37664 &    2.71832 &      -3.97898e-05 & -3.59452e-05 &    1.10696  \\
+   51470 &    2.71831 &      -2.90161e-05 & -2.73368e-05 &    1.06143  \\
+   68342 &    2.7183  &      -2.21818e-05 & -1.99576e-05 &    1.11145  \\
+   89980 &    2.7183  &      -1.62672e-05 & -1.53335e-05 &    1.06089  \\
+  125738 &    2.71829 &      -1.22408e-05 & -1.11635e-05 &    1.0965   \\
+  162036 &    2.71829 &      -9.25447e-06 & -8.44535e-06 &    1.09581  \\
+  224192 &    2.71829 &      -6.82097e-06 & -6.30498e-06 &    1.08184  \\
+  286454 &    2.71829 &      -5.24473e-06 & -4.71932e-06 &    1.11133  \\
+  381604 &    2.71829 &      -3.80668e-06 & -3.64353e-06 &    1.04478  \\
+  525526 &    2.71828 &      -2.8958e-06  & -2.62386e-06 &    1.10364  \\
+  688860 &    2.71828 &      -2.12959e-06 & -1.99779e-06 &    1.06597  \\
+  968011 &    2.71828 &      -1.59026e-06 & -1.45264e-06 &    1.09473  \\
+ 1241993 &    2.71828 &      -1.22522e-06 & -1.09623e-06 &    1.11766  \\
+ 1684477 &    2.71828 &      -8.95394e-07 & -8.37507e-07 &    1.06912  \\
+ 2213791 &    2.71828 &      -6.85983e-07 & -6.17331e-07 &    1.11121  \\
+\hline
+\end{tabular}
+
+Convergence plot:
+(10,0.14969016233339572)(15,0.11018701964184263)(19,0.0849025895416986)(26,0.06024207646672464)(34,0.0456614658433554)(45,0.03257132591475598)(64,0.024208738757699688)(84,0.018074152766380802)(116,0.013374894240512969)(146,0.010135199746220458)(203,0.007391583823154413)(269,0.005624335040994577)(357,0.0041132528638616606)(497,0.003099603684785013)(646,0.0023167097664842373)(898,0.001712651451860392)(1136,0.0013169456381634248)(1535,0.0009566997201995164)(2084,0.0007287385350864817)(2737,0.0005326713043265485)(3859,0.0003992094271603186)(4962,0.0003047739533923455)(6787,0.00022365871542540106)(8795,0.00017159026178159564)(11555,0.000124333571303481)(16176,9.429373487890302e-05)(21148,6.952397382464781e-05)(29669,5.174657258910642e-05)(37664,3.9789771412390706e-05)(51470,2.9016141738669177e-05)(68342,2.2181815131805394e-05)(89980,1.6267223153398902e-05)(125738,1.224081393047527e-05)(162036,9.254467660646526e-06)(224192,6.8209705412769495e-06)(286454,5.244727705466801e-06)(381604,3.806681689866309e-06)(525526,2.8958030795500633e-06)(688860,2.129592987287765e-06)(968011,1.5902551155910771e-06)(1241993,1.2252214522945337e-06)(1684477,8.953938577249687e-07)(2213791,6.859831103156466e-07)
+
+Effectivity index:
+(10,0.8455384632717327)(15,0.9094807739285848)(19,1.0097765189072)(26,1.0242452854710744)(34,1.0526913239374158)(45,0.9962210369272412)(64,1.0790902589761162)(84,1.0622609114906454)(116,1.0461052798306911)(146,1.0755714579472984)(203,1.0481401739019478)(269,1.1095857804065046)(357,1.0550757639840855)(497,1.1003691430618363)(646,1.087127892747763)(898,1.081388056047276)(1136,1.1059625164332536)(1535,1.0498991713445043)(2084,1.1041941972115155)(2737,1.0582329628026599)(3859,1.094951455401584)(4962,1.105162231503752)(6787,1.0737550086626215)(8795,1.110398444078355)(11555,1.0365165742106077)(16176,1.101519523448258)(21148,1.0680502071420723)(29669,1.0837348150887527)(37664,1.1069562625594251)(51470,1.0614330332401694)(68342,1.1114470402428498)(89980,1.0608919070615135)(125738,1.0965032252687839)(162036,1.0958064091987971)(224192,1.0818386442642023)(286454,1.1113307342768406)(381604,1.044777614953611)(525526,1.103643528218679)(688860,1.0659726484867063)(968011,1.094734803335889)(1241993,1.117664473189482)(1684477,1.0691180921205514)(2213791,1.1112080073481312)
