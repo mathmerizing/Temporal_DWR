@@ -395,12 +395,20 @@ if __name__ == "__main__":
         table = tabulate([[row[0], *row[1].values()] for row in convergence_table.items()], headers=["#DoFs", "$J(u_k)$", "$J(u) - J(u_k)$", "$\eta_k$", "$I_{eff}$"], tablefmt=tablefmt)
         print(table)
     
-    # print("\nConvergence table:")
-    # print("==================\n")
-    # print("DoFs (n_k) | J(u_k) | J(u) - J(u_k) | η_k | effectivity index")
-    # print("-------------------------------------------------------------")
-    # for key, value in convergence_table.items():
-    #     print(f"{key} | {value['J(u_k)']:.8e} | {value['J(u) - J(u_k)']:.8e} | {value['η_k']:.8e} | {value['effectivity index']:.8e}")
+    # convert python scientific to latex scientific notation
+    def science_format(num):
+        num = num.split("e")
+        return fr"${num[0]} \cdot 10^{{{int(num[1])}}}$"
+    
+    print("\nConvergence table:")
+    print("==================\n")
+    print("DoFs (n_k) | J(u_k) | J(u) - J(u_k) | η_k | effectivity index")
+    print("-------------------------------------------------------------")
+    for key, value in convergence_table.items():
+        _true_error = science_format(f"{value['J(u) - J(u_k)']:.4e}")
+        _est_error = science_format(f"{value['η_k']:.4e}")
+        print(f"    {key:,} & {value['J(u_k)']:.8f} & {_true_error} & {_est_error} & {value['effectivity index']:.6f} \\\\")
+
 
     # plot convergence table
     plt.clf()
