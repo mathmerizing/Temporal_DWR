@@ -64,7 +64,7 @@ class TemporalMesh:
             Y.append(np.inf)
         plt.yscale("log")
         plt.xlabel("t")
-        plt.ylabel(r"$\Delta t$")
+        plt.ylabel("k") #(r"$\Delta t$")
         plt.plot(X, Y, color="black", linewidth=1)
         if savepath is None:
             plt.show()
