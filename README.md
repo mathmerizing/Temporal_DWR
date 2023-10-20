@@ -129,7 +129,7 @@ u = 0 \qquad \text{on } \partial \Omega \times I,
 $$
 
 $$
-u = 0 \qquad \text{on } \Omega \times \{ 0 \},
+u = 0 \qquad \text{on } \Omega \times \lbrace 0 \rbrace,
 $$
 
 with spatial domain $\Omega = (0,1)^2$, temporal domain $I = (0,2)$ and right hand side
