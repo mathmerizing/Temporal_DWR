@@ -1,4 +1,4 @@
-# Temporal Dual-Weighted Residual (DWR) Method
+# Temporal Dual-Weighted Residual Method
 Dual-weighted residual error estimation for temporal error estimation applied to tensor-product space-time finite elements
 
 ## Dual-Weighted Residual (DWR) Method
