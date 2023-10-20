@@ -1,7 +1,7 @@
 # Temporal Dual-Weighted Residual (DWR) Method
 Dual-weighted residual error estimation for temporal error estimation applied to tensor-product space-time finite elements
 
-## Dual-Weighted Residual Method
+## Dual-Weighted Residual (DWR) Method
 The dual-weighted residual method consists of two problems: the primal and the dual problem.
 
 - Primal problem (original ODE/PDE): Find weak solution U such that
